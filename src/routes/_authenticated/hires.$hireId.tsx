@@ -2,6 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
+import { HireChannelCard } from "@/components/HireChannelCard";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -105,6 +106,8 @@ function HireDetail() {
           {!hire.pii_access && !hire.on_call && !hire.direct_reports ? "none" : ""}
         </div>
       </dl>
+
+      <HireChannelCard hire={hire} orgId={orgId} />
 
       <div className="mt-8 flex flex-wrap gap-2">
         {FILTERS.map((f) => (

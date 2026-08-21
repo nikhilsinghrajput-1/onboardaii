@@ -77,7 +77,20 @@ export const Route = createFileRoute("/api/public/viasocket/$orgSlug/hire")({
           console.error("hire upsert failed", error);
           return Response.json({ error: "could not store hire" }, { status: 500 });
         }
-        return Response.json({ ok: true, hire_id: data.id });
+
+        // Give every new hire a dedicated Slack channel in the org's own workspace.
+        const { ensureHireChannel } = await import("@/lib/slack-channels.server");
+        const channel = await ensureHireChannel(org.id, data.id).catch((err: unknown) => {
+          console.error("hire channel provisioning threw", err);
+          return null;
+        });
+
+        return Response.json({
+          ok: true,
+          hire_id: data.id,
+          slack_channel: channel?.channelName ?? null,
+          slack_channel_error: channel?.error ?? null,
+        });
       },
     },
   },
