@@ -29,12 +29,39 @@ export function HireChannelCard({ hire, orgId }: { hire: Hire; orgId: string | u
     },
   });
 
+  const runAccess = useServerFn(grantHireSlackAccess);
+  const access = useMutation({
+    mutationFn: async () => {
+      if (!orgId) throw new Error("No active organization");
+      return runAccess({ data: { orgId, hireId: hire.id } });
+    },
+    onSuccess: (result) => {
+      if (result.ok) {
+        toast.success(`Access granted: #${result.channels.join(", #")}`);
+      } else {
+        toast.error(result.error ?? "Slack access could not be granted");
+      }
+      void queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    },
+    onError: (error: unknown) => {
+      toast.error(error instanceof Error ? error.message : "Slack access could not be granted");
+    },
+  });
+
   return (
     <section className="mt-6 rounded-xl border border-border/70 bg-card p-4">
       <div className="flex flex-wrap items-center gap-3">
         <h2 className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
           Slack onboarding channel
         </h2>
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => access.mutate()}
+          disabled={access.isPending}
+        >
+          {access.isPending ? "Granting…" : "Grant #general access"}
+        </Button>
         <div className="ml-auto">
           {hire.slack_channel_id ? (
             <span className="rounded-full border border-ok/40 bg-ok/10 px-3 py-1 text-xs text-ok">
