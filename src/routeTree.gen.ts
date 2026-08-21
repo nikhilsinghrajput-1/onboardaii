@@ -10,33 +10,43 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiPublicViasocketHireRouteImport } from './routes/api/public/viasocket/hire'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicViasocketHireRoute = ApiPublicViasocketHireRouteImport.update({
+  id: '/api/public/viasocket/hire',
+  path: '/api/public/viasocket/hire',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/api/public/viasocket/hire': typeof ApiPublicViasocketHireRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/api/public/viasocket/hire': typeof ApiPublicViasocketHireRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/api/public/viasocket/hire': typeof ApiPublicViasocketHireRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/api/public/viasocket/hire'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/api/public/viasocket/hire'
+  id: '__root__' | '/' | '/api/public/viasocket/hire'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ApiPublicViasocketHireRoute: typeof ApiPublicViasocketHireRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +58,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/viasocket/hire': {
+      id: '/api/public/viasocket/hire'
+      path: '/api/public/viasocket/hire'
+      fullPath: '/api/public/viasocket/hire'
+      preLoaderRoute: typeof ApiPublicViasocketHireRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ApiPublicViasocketHireRoute: ApiPublicViasocketHireRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
