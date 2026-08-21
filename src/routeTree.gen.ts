@@ -21,6 +21,8 @@ import { Route as OauthConnectorReturnRouteImport } from './routes/oauth/$connec
 import { Route as ApiPublicSlackEventsRouteImport } from './routes/api/public/slack/events'
 import { Route as ApiPublicViasocketHireRouteImport } from './routes/api/public/viasocket/hire'
 import { Route as ApiPublicViasocketTaskRouteImport } from './routes/api/public/viasocket/task'
+import { Route as ApiPublicViasocketOrgSlugHireRouteImport } from './routes/api/public/viasocket/$orgSlug/hire'
+import { Route as ApiPublicViasocketOrgSlugTaskRouteImport } from './routes/api/public/viasocket/$orgSlug/task'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -83,6 +85,18 @@ const ApiPublicViasocketTaskRoute = ApiPublicViasocketTaskRouteImport.update({
   path: '/api/public/viasocket/task',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicViasocketOrgSlugHireRoute =
+  ApiPublicViasocketOrgSlugHireRouteImport.update({
+    id: '/api/public/viasocket/$orgSlug/hire',
+    path: '/api/public/viasocket/$orgSlug/hire',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiPublicViasocketOrgSlugTaskRoute =
+  ApiPublicViasocketOrgSlugTaskRouteImport.update({
+    id: '/api/public/viasocket/$orgSlug/task',
+    path: '/api/public/viasocket/$orgSlug/task',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -96,6 +110,8 @@ export interface FileRoutesByFullPath {
   '/api/public/slack/events': typeof ApiPublicSlackEventsRoute
   '/api/public/viasocket/hire': typeof ApiPublicViasocketHireRoute
   '/api/public/viasocket/task': typeof ApiPublicViasocketTaskRoute
+  '/api/public/viasocket/$orgSlug/hire': typeof ApiPublicViasocketOrgSlugHireRoute
+  '/api/public/viasocket/$orgSlug/task': typeof ApiPublicViasocketOrgSlugTaskRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -109,6 +125,8 @@ export interface FileRoutesByTo {
   '/api/public/slack/events': typeof ApiPublicSlackEventsRoute
   '/api/public/viasocket/hire': typeof ApiPublicViasocketHireRoute
   '/api/public/viasocket/task': typeof ApiPublicViasocketTaskRoute
+  '/api/public/viasocket/$orgSlug/hire': typeof ApiPublicViasocketOrgSlugHireRoute
+  '/api/public/viasocket/$orgSlug/task': typeof ApiPublicViasocketOrgSlugTaskRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -124,6 +142,8 @@ export interface FileRoutesById {
   '/api/public/slack/events': typeof ApiPublicSlackEventsRoute
   '/api/public/viasocket/hire': typeof ApiPublicViasocketHireRoute
   '/api/public/viasocket/task': typeof ApiPublicViasocketTaskRoute
+  '/api/public/viasocket/$orgSlug/hire': typeof ApiPublicViasocketOrgSlugHireRoute
+  '/api/public/viasocket/$orgSlug/task': typeof ApiPublicViasocketOrgSlugTaskRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -139,6 +159,8 @@ export interface FileRouteTypes {
     | '/api/public/slack/events'
     | '/api/public/viasocket/hire'
     | '/api/public/viasocket/task'
+    | '/api/public/viasocket/$orgSlug/hire'
+    | '/api/public/viasocket/$orgSlug/task'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -152,6 +174,8 @@ export interface FileRouteTypes {
     | '/api/public/slack/events'
     | '/api/public/viasocket/hire'
     | '/api/public/viasocket/task'
+    | '/api/public/viasocket/$orgSlug/hire'
+    | '/api/public/viasocket/$orgSlug/task'
   id:
     | '__root__'
     | '/'
@@ -166,6 +190,8 @@ export interface FileRouteTypes {
     | '/api/public/slack/events'
     | '/api/public/viasocket/hire'
     | '/api/public/viasocket/task'
+    | '/api/public/viasocket/$orgSlug/hire'
+    | '/api/public/viasocket/$orgSlug/task'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -176,6 +202,8 @@ export interface RootRouteChildren {
   ApiPublicSlackEventsRoute: typeof ApiPublicSlackEventsRoute
   ApiPublicViasocketHireRoute: typeof ApiPublicViasocketHireRoute
   ApiPublicViasocketTaskRoute: typeof ApiPublicViasocketTaskRoute
+  ApiPublicViasocketOrgSlugHireRoute: typeof ApiPublicViasocketOrgSlugHireRoute
+  ApiPublicViasocketOrgSlugTaskRoute: typeof ApiPublicViasocketOrgSlugTaskRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -264,6 +292,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicViasocketTaskRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/viasocket/$orgSlug/hire': {
+      id: '/api/public/viasocket/$orgSlug/hire'
+      path: '/api/public/viasocket/$orgSlug/hire'
+      fullPath: '/api/public/viasocket/$orgSlug/hire'
+      preLoaderRoute: typeof ApiPublicViasocketOrgSlugHireRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/viasocket/$orgSlug/task': {
+      id: '/api/public/viasocket/$orgSlug/task'
+      path: '/api/public/viasocket/$orgSlug/task'
+      fullPath: '/api/public/viasocket/$orgSlug/task'
+      preLoaderRoute: typeof ApiPublicViasocketOrgSlugTaskRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -294,6 +336,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicSlackEventsRoute: ApiPublicSlackEventsRoute,
   ApiPublicViasocketHireRoute: ApiPublicViasocketHireRoute,
   ApiPublicViasocketTaskRoute: ApiPublicViasocketTaskRoute,
+  ApiPublicViasocketOrgSlugHireRoute: ApiPublicViasocketOrgSlugHireRoute,
+  ApiPublicViasocketOrgSlugTaskRoute: ApiPublicViasocketOrgSlugTaskRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
