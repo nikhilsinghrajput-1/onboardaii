@@ -336,6 +336,9 @@ export type Database = {
           created_by: string
           id: string
           name: string
+          resume_url: string | null
+          slack_alert_channel: string | null
+          slack_approval_channel: string | null
           slug: string
           updated_at: string
           webhook_secret: string
@@ -345,6 +348,9 @@ export type Database = {
           created_by: string
           id?: string
           name: string
+          resume_url?: string | null
+          slack_alert_channel?: string | null
+          slack_approval_channel?: string | null
           slug: string
           updated_at?: string
           webhook_secret?: string
@@ -354,6 +360,9 @@ export type Database = {
           created_by?: string
           id?: string
           name?: string
+          resume_url?: string | null
+          slack_alert_channel?: string | null
+          slack_approval_channel?: string | null
           slug?: string
           updated_at?: string
           webhook_secret?: string
