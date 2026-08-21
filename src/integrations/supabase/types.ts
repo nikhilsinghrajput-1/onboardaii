@@ -14,7 +14,211 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      alert_log: {
+        Row: {
+          channel: string
+          created_at: string
+          detail: string | null
+          hire_id: string | null
+          id: string
+          kind: string
+          send_error: string | null
+          task_id: string | null
+        }
+        Insert: {
+          channel: string
+          created_at?: string
+          detail?: string | null
+          hire_id?: string | null
+          id?: string
+          kind: string
+          send_error?: string | null
+          task_id?: string | null
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          detail?: string | null
+          hire_id?: string | null
+          id?: string
+          kind?: string
+          send_error?: string | null
+          task_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alert_log_hire_id_fkey"
+            columns: ["hire_id"]
+            isOneToOne: false
+            referencedRelation: "hires"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alert_log_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "onboarding_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      approvals: {
+        Row: {
+          channel: string
+          created_at: string
+          decided_by: string | null
+          decided_by_label: string | null
+          decision: Database["public"]["Enums"]["approval_decision"]
+          id: string
+          note: string
+          task_id: string
+        }
+        Insert: {
+          channel?: string
+          created_at?: string
+          decided_by?: string | null
+          decided_by_label?: string | null
+          decision: Database["public"]["Enums"]["approval_decision"]
+          id?: string
+          note: string
+          task_id: string
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          decided_by?: string | null
+          decided_by_label?: string | null
+          decision?: Database["public"]["Enums"]["approval_decision"]
+          id?: string
+          note?: string
+          task_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "approvals_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "onboarding_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      hires: {
+        Row: {
+          created_at: string
+          department: string
+          direct_reports: boolean
+          email: string | null
+          employment_type: string | null
+          external_id: string | null
+          full_name: string
+          id: string
+          location: string | null
+          on_call: boolean
+          owning_team: string | null
+          pii_access: boolean
+          role: string
+          seniority: string | null
+          start_date: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          department: string
+          direct_reports?: boolean
+          email?: string | null
+          employment_type?: string | null
+          external_id?: string | null
+          full_name: string
+          id?: string
+          location?: string | null
+          on_call?: boolean
+          owning_team?: string | null
+          pii_access?: boolean
+          role: string
+          seniority?: string | null
+          start_date?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          department?: string
+          direct_reports?: boolean
+          email?: string | null
+          employment_type?: string | null
+          external_id?: string | null
+          full_name?: string
+          id?: string
+          location?: string | null
+          on_call?: boolean
+          owning_team?: string | null
+          pii_access?: boolean
+          role?: string
+          seniority?: string | null
+          start_date?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      onboarding_tasks: {
+        Row: {
+          action: string
+          confidence: number | null
+          created_at: string
+          error_message: string | null
+          external_task_id: string | null
+          hire_id: string
+          id: string
+          raw_response: string | null
+          reason: string | null
+          retry_count: number
+          sensitive: boolean
+          status: Database["public"]["Enums"]["task_status"]
+          system: string
+          updated_at: string
+        }
+        Insert: {
+          action: string
+          confidence?: number | null
+          created_at?: string
+          error_message?: string | null
+          external_task_id?: string | null
+          hire_id: string
+          id?: string
+          raw_response?: string | null
+          reason?: string | null
+          retry_count?: number
+          sensitive?: boolean
+          status?: Database["public"]["Enums"]["task_status"]
+          system: string
+          updated_at?: string
+        }
+        Update: {
+          action?: string
+          confidence?: number | null
+          created_at?: string
+          error_message?: string | null
+          external_task_id?: string | null
+          hire_id?: string
+          id?: string
+          raw_response?: string | null
+          reason?: string | null
+          retry_count?: number
+          sensitive?: boolean
+          status?: Database["public"]["Enums"]["task_status"]
+          system?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_tasks_hire_id_fkey"
+            columns: ["hire_id"]
+            isOneToOne: false
+            referencedRelation: "hires"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +227,13 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      approval_decision: "approved" | "rejected"
+      task_status:
+        | "not_started"
+        | "in_progress"
+        | "completed"
+        | "failed"
+        | "needs_human"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +360,15 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      approval_decision: ["approved", "rejected"],
+      task_status: [
+        "not_started",
+        "in_progress",
+        "completed",
+        "failed",
+        "needs_human",
+      ],
+    },
   },
 } as const
