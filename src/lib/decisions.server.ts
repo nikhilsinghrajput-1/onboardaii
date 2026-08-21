@@ -1,9 +1,10 @@
-import { alertChannel, approvalChannel, resumeViaSocket, slackCall } from "./ops.server";
+import { loadOrgById, resumeForOrg, slackCallForOrg, type OrgRow } from "./org-ops.server";
 
 export type Decision = "approved" | "rejected";
 
 export type TaskRow = {
   id: string;
+  org_id: string;
   hire_id: string;
   system: string;
   action: string;
@@ -23,21 +24,27 @@ export async function applyDecision(input: {
   decidedBy?: string | null;
   decidedByLabel: string;
   channel: "in_app" | "slack";
+  /** When set, the decision only applies to a task inside this organization. */
+  orgId?: string;
 }) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
   const { data: task, error: taskError } = await supabaseAdmin
     .from("onboarding_tasks")
-    .select("id, hire_id, system, action, external_task_id, status")
+    .select("id, org_id, hire_id, system, action, external_task_id, status")
     .eq("id", input.taskId)
     .maybeSingle();
   if (taskError) throw taskError;
   if (!task) throw new Error("Task not found");
+  if (input.orgId && task.org_id !== input.orgId) {
+    throw new Error("That task belongs to another organization.");
+  }
   if (task.status !== "needs_human") {
     return { ok: false as const, message: "This task no longer needs a decision." };
   }
 
   const { error: approvalError } = await supabaseAdmin.from("approvals").insert({
+    org_id: task.org_id,
     task_id: task.id,
     decision: input.decision,
     note: input.note,
@@ -64,8 +71,12 @@ export async function applyDecision(input: {
     .eq("id", task.hire_id)
     .maybeSingle();
 
-  const resume = await resumeViaSocket({
+  const org = await loadOrgById(task.org_id);
+  if (!org) throw new Error("Organization not found");
+
+  const resume = await resumeForOrg(org, {
     event: "approval_decision",
+    org_slug: org.slug,
     task_id: task.id,
     external_task_id: task.external_task_id,
     hire_id: task.hire_id,
@@ -77,10 +88,9 @@ export async function applyDecision(input: {
     decided_by: input.decidedByLabel,
   });
 
-  const channel = approvalChannel();
-  if (channel) {
-    await slackCall("chat.postMessage", {
-      channel,
+  if (org.slack_approval_channel) {
+    await slackCallForOrg(org.id, "chat.postMessage", {
+      channel: org.slack_approval_channel,
       text: `${input.decision === "approved" ? ":white_check_mark: Approved" : ":no_entry: Rejected"} — ${
         hire?.full_name ?? "hire"
       } · ${task.system} · ${task.action}\n_by ${input.decidedByLabel}_ — ${input.note}`,
@@ -90,10 +100,15 @@ export async function applyDecision(input: {
   return { ok: true as const, resumed: resume.ok, resumeDetail: resume.detail };
 }
 
-export async function notifyApprovalNeeded(task: TaskRow, hireName: string, appUrl: string) {
-  const channel = approvalChannel();
+export async function notifyApprovalNeeded(
+  org: OrgRow,
+  task: TaskRow,
+  hireName: string,
+  appUrl: string,
+) {
+  const channel = org.slack_approval_channel;
   if (!channel) return;
-  await slackCall("chat.postMessage", {
+  await slackCallForOrg(org.id, "chat.postMessage", {
     channel,
     text: `Approval needed: ${hireName} · ${task.system} · ${task.action}`,
     blocks: [
@@ -101,7 +116,7 @@ export async function notifyApprovalNeeded(task: TaskRow, hireName: string, appU
         type: "section",
         text: {
           type: "mrkdwn",
-          text: `*Approval needed* for *${hireName}*\n*System:* ${task.system}\n*Action:* ${task.action}\n*Reason:* ${
+          text: `*Approval needed* for *${hireName}* (${org.name})\n*System:* ${task.system}\n*Action:* ${task.action}\n*Reason:* ${
             task.reason ?? "n/a"
           }\n*Confidence:* ${task.confidence ?? "n/a"}`,
         },
@@ -135,9 +150,14 @@ export async function notifyApprovalNeeded(task: TaskRow, hireName: string, appU
   });
 }
 
-export async function notifyFailure(task: TaskRow, hireName: string, owningTeam: string | null) {
+export async function notifyFailure(
+  org: OrgRow,
+  task: TaskRow,
+  hireName: string,
+  owningTeam: string | null,
+) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const channel = alertChannel();
+  const channel = org.slack_alert_channel ?? org.slack_approval_channel;
   const detail = `Hire: ${hireName}${owningTeam ? ` (owner: ${owningTeam})` : ""}\nSystem: ${
     task.system
   }\nAction: ${task.action}\nRetries: ${task.retry_count}\nError: ${
@@ -146,7 +166,7 @@ export async function notifyFailure(task: TaskRow, hireName: string, owningTeam:
 
   let sendError: string | null = null;
   if (channel) {
-    const res = await slackCall("chat.postMessage", {
+    const res = await slackCallForOrg(org.id, "chat.postMessage", {
       channel,
       text: `:rotating_light: Provisioning failed after ${task.retry_count} retries`,
       blocks: [
@@ -162,10 +182,11 @@ export async function notifyFailure(task: TaskRow, hireName: string, owningTeam:
     });
     if (!res.ok) sendError = `${res.error}: ${res.raw.slice(0, 500)}`;
   } else {
-    sendError = "No Slack alert channel configured";
+    sendError = "No alert channel configured for this organization";
   }
 
   await supabaseAdmin.from("alert_log").insert({
+    org_id: org.id,
     task_id: task.id,
     hire_id: task.hire_id,
     kind: "task_failed",
