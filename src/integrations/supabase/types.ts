@@ -140,6 +140,9 @@ export type Database = {
           pii_access: boolean
           role: string
           seniority: string | null
+          slack_channel_error: string | null
+          slack_channel_id: string | null
+          slack_channel_name: string | null
           start_date: string | null
           updated_at: string
         }
@@ -159,6 +162,9 @@ export type Database = {
           pii_access?: boolean
           role: string
           seniority?: string | null
+          slack_channel_error?: string | null
+          slack_channel_id?: string | null
+          slack_channel_name?: string | null
           start_date?: string | null
           updated_at?: string
         }
@@ -178,6 +184,9 @@ export type Database = {
           pii_access?: boolean
           role?: string
           seniority?: string | null
+          slack_channel_error?: string | null
+          slack_channel_id?: string | null
+          slack_channel_name?: string | null
           start_date?: string | null
           updated_at?: string
         }
