@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 
+import { NewHireDialog } from "@/components/NewHireDialog";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRealtimeRefresh } from "@/hooks/useRealtimeRefresh";
@@ -71,10 +72,18 @@ function DashboardPage() {
 
   return (
     <main className="mx-auto max-w-7xl px-6 py-10">
-      <h1 className="text-2xl font-semibold tracking-tight">New hire provisioning</h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        State is pushed in by the automation flow after every action step. Updates land live.
-      </p>
+      <div className="flex flex-wrap items-start gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">New hire provisioning</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Add a hire here or let the automation flow push state in after every action step.
+            Updates land live.
+          </p>
+        </div>
+        <div className="ml-auto">
+          <NewHireDialog orgId={orgId} />
+        </div>
+      </div>
 
       <section className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
         <StatCard label="Completed" value={totals.completed} tone="text-ok" />
