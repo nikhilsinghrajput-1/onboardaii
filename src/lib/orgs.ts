@@ -53,29 +53,17 @@ export const orgsQuery = queryOptions({
 
 /** Creates the organization and makes the current user its owner. */
 export async function createOrganization(name: string): Promise<Organization> {
-  const { data: userData, error: userError } = await supabase.auth.getUser();
-  if (userError || !userData.user) throw new Error("You need to be signed in.");
-
   const base = slugify(name);
   let slug = base;
   for (let attempt = 0; attempt < 5; attempt += 1) {
-    const { data, error } = await supabase
-      .from("organizations")
-      .insert({ name: name.trim(), slug, created_by: userData.user.id })
-      .select(
-        "id, name, slug, webhook_secret, slack_approval_channel, slack_alert_channel, resume_url, created_at",
-      )
-      .single();
+    const { data, error } = await supabase.rpc("create_organization", {
+      _name: name.trim(),
+      _slug: slug,
+    });
 
-    if (!error && data) {
-      const { error: memberError } = await supabase
-        .from("organization_members")
-        .insert({ org_id: data.id, user_id: userData.user.id, role: "owner" });
-      if (memberError) throw memberError;
-      return data as Organization;
-    }
-    // 23505 = unique violation on slug → try a suffixed slug.
-    if (error && error.code === "23505") {
+    if (!error && data) return data as unknown as Organization;
+    // 23505 = unique violation on slug -> retry with a suffixed slug.
+    if (error && (error.code === "23505" || /duplicate key/i.test(error.message))) {
       slug = `${base}-${Math.random().toString(36).slice(2, 6)}`;
       continue;
     }
