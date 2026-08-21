@@ -11,7 +11,16 @@ export const CONNECTOR_CATALOG: ConnectorSpec[] = [
     id: "slack",
     label: "Slack",
     blurb: "Approval requests and failure alerts in your own workspace.",
-    scopes: ["chat:write", "channels:read", "groups:read"],
+    scopes: [
+      "chat:write",
+      "chat:write.public",
+      "channels:read",
+      "channels:manage",
+      "groups:read",
+      "groups:write",
+      "users:read",
+      "users:read.email",
+    ],
   },
   {
     id: "google_mail",
