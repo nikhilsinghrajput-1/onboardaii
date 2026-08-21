@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedApprovalsRouteImport } from './routes/_authenticated/approvals'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedIntegrationsRouteImport } from './routes/_authenticated/integrations'
 import { Route as AuthenticatedHiresHireIdRouteImport } from './routes/_authenticated/hires.$hireId'
 import { Route as ApiPublicSlackEventsRouteImport } from './routes/api/public/slack/events'
 import { Route as ApiPublicViasocketHireRouteImport } from './routes/api/public/viasocket/hire'
@@ -43,6 +44,12 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedIntegrationsRoute =
+  AuthenticatedIntegrationsRouteImport.update({
+    id: '/integrations',
+    path: '/integrations',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedHiresHireIdRoute =
   AuthenticatedHiresHireIdRouteImport.update({
     id: '/hires/$hireId',
@@ -70,6 +77,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/approvals': typeof AuthenticatedApprovalsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/integrations': typeof AuthenticatedIntegrationsRoute
   '/hires/$hireId': typeof AuthenticatedHiresHireIdRoute
   '/api/public/slack/events': typeof ApiPublicSlackEventsRoute
   '/api/public/viasocket/hire': typeof ApiPublicViasocketHireRoute
@@ -80,6 +88,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/approvals': typeof AuthenticatedApprovalsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/integrations': typeof AuthenticatedIntegrationsRoute
   '/hires/$hireId': typeof AuthenticatedHiresHireIdRoute
   '/api/public/slack/events': typeof ApiPublicSlackEventsRoute
   '/api/public/viasocket/hire': typeof ApiPublicViasocketHireRoute
@@ -92,6 +101,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/approvals': typeof AuthenticatedApprovalsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/integrations': typeof AuthenticatedIntegrationsRoute
   '/_authenticated/hires/$hireId': typeof AuthenticatedHiresHireIdRoute
   '/api/public/slack/events': typeof ApiPublicSlackEventsRoute
   '/api/public/viasocket/hire': typeof ApiPublicViasocketHireRoute
@@ -104,6 +114,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/approvals'
     | '/dashboard'
+    | '/integrations'
     | '/hires/$hireId'
     | '/api/public/slack/events'
     | '/api/public/viasocket/hire'
@@ -114,6 +125,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/approvals'
     | '/dashboard'
+    | '/integrations'
     | '/hires/$hireId'
     | '/api/public/slack/events'
     | '/api/public/viasocket/hire'
@@ -125,6 +137,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/approvals'
     | '/_authenticated/dashboard'
+    | '/_authenticated/integrations'
     | '/_authenticated/hires/$hireId'
     | '/api/public/slack/events'
     | '/api/public/viasocket/hire'
@@ -177,6 +190,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/integrations': {
+      id: '/_authenticated/integrations'
+      path: '/integrations'
+      fullPath: '/integrations'
+      preLoaderRoute: typeof AuthenticatedIntegrationsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/hires/$hireId': {
       id: '/_authenticated/hires/$hireId'
       path: '/hires/$hireId'
@@ -211,12 +231,14 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedApprovalsRoute: typeof AuthenticatedApprovalsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedIntegrationsRoute: typeof AuthenticatedIntegrationsRoute
   AuthenticatedHiresHireIdRoute: typeof AuthenticatedHiresHireIdRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedApprovalsRoute: AuthenticatedApprovalsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedIntegrationsRoute: AuthenticatedIntegrationsRoute,
   AuthenticatedHiresHireIdRoute: AuthenticatedHiresHireIdRoute,
 }
 
