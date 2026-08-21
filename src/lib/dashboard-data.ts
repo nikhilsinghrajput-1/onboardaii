@@ -62,41 +62,50 @@ export const STATUS_LABEL: Record<TaskStatus, string> = {
   needs_human: "Needs approval",
 };
 
-export const hiresQuery = queryOptions({
-  queryKey: ["hires"],
-  queryFn: async (): Promise<Hire[]> => {
-    const { data, error } = await supabase
-      .from("hires")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (error) throw error;
-    return (data ?? []) as Hire[];
-  },
-});
+export const hiresQuery = (orgId: string | undefined) =>
+  queryOptions({
+    queryKey: ["hires", orgId],
+    enabled: Boolean(orgId),
+    queryFn: async (): Promise<Hire[]> => {
+      const { data, error } = await supabase
+        .from("hires")
+        .select("*")
+        .eq("org_id", orgId!)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as Hire[];
+    },
+  });
 
-export const tasksQuery = queryOptions({
-  queryKey: ["tasks"],
-  queryFn: async (): Promise<Task[]> => {
-    const { data, error } = await supabase
-      .from("onboarding_tasks")
-      .select("*")
-      .order("created_at", { ascending: true });
-    if (error) throw error;
-    return (data ?? []) as Task[];
-  },
-});
+export const tasksQuery = (orgId: string | undefined) =>
+  queryOptions({
+    queryKey: ["tasks", orgId],
+    enabled: Boolean(orgId),
+    queryFn: async (): Promise<Task[]> => {
+      const { data, error } = await supabase
+        .from("onboarding_tasks")
+        .select("*")
+        .eq("org_id", orgId!)
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      return (data ?? []) as Task[];
+    },
+  });
 
-export const approvalsQuery = queryOptions({
-  queryKey: ["approvals"],
-  queryFn: async (): Promise<Approval[]> => {
-    const { data, error } = await supabase
-      .from("approvals")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (error) throw error;
-    return (data ?? []) as Approval[];
-  },
-});
+export const approvalsQuery = (orgId: string | undefined) =>
+  queryOptions({
+    queryKey: ["approvals", orgId],
+    enabled: Boolean(orgId),
+    queryFn: async (): Promise<Approval[]> => {
+      const { data, error } = await supabase
+        .from("approvals")
+        .select("*")
+        .eq("org_id", orgId!)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      return (data ?? []) as Approval[];
+    },
+  });
 
 export function countByStatus(tasks: Task[]) {
   const counts: Record<TaskStatus, number> = {
