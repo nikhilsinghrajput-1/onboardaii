@@ -19,8 +19,6 @@ import { Route as AuthenticatedOrgsRouteImport } from './routes/_authenticated/o
 import { Route as AuthenticatedHiresHireIdRouteImport } from './routes/_authenticated/hires.$hireId'
 import { Route as OauthConnectorReturnRouteImport } from './routes/oauth/$connector/return'
 import { Route as ApiPublicSlackEventsRouteImport } from './routes/api/public/slack/events'
-import { Route as ApiPublicViasocketHireRouteImport } from './routes/api/public/viasocket/hire'
-import { Route as ApiPublicViasocketTaskRouteImport } from './routes/api/public/viasocket/task'
 import { Route as ApiPublicViasocketOrgSlugHireRouteImport } from './routes/api/public/viasocket/$orgSlug/hire'
 import { Route as ApiPublicViasocketOrgSlugTaskRouteImport } from './routes/api/public/viasocket/$orgSlug/task'
 
@@ -75,16 +73,6 @@ const ApiPublicSlackEventsRoute = ApiPublicSlackEventsRouteImport.update({
   path: '/api/public/slack/events',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicViasocketHireRoute = ApiPublicViasocketHireRouteImport.update({
-  id: '/api/public/viasocket/hire',
-  path: '/api/public/viasocket/hire',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicViasocketTaskRoute = ApiPublicViasocketTaskRouteImport.update({
-  id: '/api/public/viasocket/task',
-  path: '/api/public/viasocket/task',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiPublicViasocketOrgSlugHireRoute =
   ApiPublicViasocketOrgSlugHireRouteImport.update({
     id: '/api/public/viasocket/$orgSlug/hire',
@@ -108,8 +96,6 @@ export interface FileRoutesByFullPath {
   '/hires/$hireId': typeof AuthenticatedHiresHireIdRoute
   '/oauth/$connector/return': typeof OauthConnectorReturnRoute
   '/api/public/slack/events': typeof ApiPublicSlackEventsRoute
-  '/api/public/viasocket/hire': typeof ApiPublicViasocketHireRoute
-  '/api/public/viasocket/task': typeof ApiPublicViasocketTaskRoute
   '/api/public/viasocket/$orgSlug/hire': typeof ApiPublicViasocketOrgSlugHireRoute
   '/api/public/viasocket/$orgSlug/task': typeof ApiPublicViasocketOrgSlugTaskRoute
 }
@@ -123,8 +109,6 @@ export interface FileRoutesByTo {
   '/hires/$hireId': typeof AuthenticatedHiresHireIdRoute
   '/oauth/$connector/return': typeof OauthConnectorReturnRoute
   '/api/public/slack/events': typeof ApiPublicSlackEventsRoute
-  '/api/public/viasocket/hire': typeof ApiPublicViasocketHireRoute
-  '/api/public/viasocket/task': typeof ApiPublicViasocketTaskRoute
   '/api/public/viasocket/$orgSlug/hire': typeof ApiPublicViasocketOrgSlugHireRoute
   '/api/public/viasocket/$orgSlug/task': typeof ApiPublicViasocketOrgSlugTaskRoute
 }
@@ -140,8 +124,6 @@ export interface FileRoutesById {
   '/_authenticated/hires/$hireId': typeof AuthenticatedHiresHireIdRoute
   '/oauth/$connector/return': typeof OauthConnectorReturnRoute
   '/api/public/slack/events': typeof ApiPublicSlackEventsRoute
-  '/api/public/viasocket/hire': typeof ApiPublicViasocketHireRoute
-  '/api/public/viasocket/task': typeof ApiPublicViasocketTaskRoute
   '/api/public/viasocket/$orgSlug/hire': typeof ApiPublicViasocketOrgSlugHireRoute
   '/api/public/viasocket/$orgSlug/task': typeof ApiPublicViasocketOrgSlugTaskRoute
 }
@@ -157,8 +139,6 @@ export interface FileRouteTypes {
     | '/hires/$hireId'
     | '/oauth/$connector/return'
     | '/api/public/slack/events'
-    | '/api/public/viasocket/hire'
-    | '/api/public/viasocket/task'
     | '/api/public/viasocket/$orgSlug/hire'
     | '/api/public/viasocket/$orgSlug/task'
   fileRoutesByTo: FileRoutesByTo
@@ -172,8 +152,6 @@ export interface FileRouteTypes {
     | '/hires/$hireId'
     | '/oauth/$connector/return'
     | '/api/public/slack/events'
-    | '/api/public/viasocket/hire'
-    | '/api/public/viasocket/task'
     | '/api/public/viasocket/$orgSlug/hire'
     | '/api/public/viasocket/$orgSlug/task'
   id:
@@ -188,8 +166,6 @@ export interface FileRouteTypes {
     | '/_authenticated/hires/$hireId'
     | '/oauth/$connector/return'
     | '/api/public/slack/events'
-    | '/api/public/viasocket/hire'
-    | '/api/public/viasocket/task'
     | '/api/public/viasocket/$orgSlug/hire'
     | '/api/public/viasocket/$orgSlug/task'
   fileRoutesById: FileRoutesById
@@ -200,8 +176,6 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   OauthConnectorReturnRoute: typeof OauthConnectorReturnRoute
   ApiPublicSlackEventsRoute: typeof ApiPublicSlackEventsRoute
-  ApiPublicViasocketHireRoute: typeof ApiPublicViasocketHireRoute
-  ApiPublicViasocketTaskRoute: typeof ApiPublicViasocketTaskRoute
   ApiPublicViasocketOrgSlugHireRoute: typeof ApiPublicViasocketOrgSlugHireRoute
   ApiPublicViasocketOrgSlugTaskRoute: typeof ApiPublicViasocketOrgSlugTaskRoute
 }
@@ -278,20 +252,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicSlackEventsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/viasocket/hire': {
-      id: '/api/public/viasocket/hire'
-      path: '/api/public/viasocket/hire'
-      fullPath: '/api/public/viasocket/hire'
-      preLoaderRoute: typeof ApiPublicViasocketHireRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/viasocket/task': {
-      id: '/api/public/viasocket/task'
-      path: '/api/public/viasocket/task'
-      fullPath: '/api/public/viasocket/task'
-      preLoaderRoute: typeof ApiPublicViasocketTaskRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/public/viasocket/$orgSlug/hire': {
       id: '/api/public/viasocket/$orgSlug/hire'
       path: '/api/public/viasocket/$orgSlug/hire'
@@ -334,8 +294,6 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   OauthConnectorReturnRoute: OauthConnectorReturnRoute,
   ApiPublicSlackEventsRoute: ApiPublicSlackEventsRoute,
-  ApiPublicViasocketHireRoute: ApiPublicViasocketHireRoute,
-  ApiPublicViasocketTaskRoute: ApiPublicViasocketTaskRoute,
   ApiPublicViasocketOrgSlugHireRoute: ApiPublicViasocketOrgSlugHireRoute,
   ApiPublicViasocketOrgSlugTaskRoute: ApiPublicViasocketOrgSlugTaskRoute,
 }
