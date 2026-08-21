@@ -22,6 +22,7 @@ export type Database = {
           hire_id: string | null
           id: string
           kind: string
+          org_id: string
           send_error: string | null
           task_id: string | null
         }
@@ -32,6 +33,7 @@ export type Database = {
           hire_id?: string | null
           id?: string
           kind: string
+          org_id: string
           send_error?: string | null
           task_id?: string | null
         }
@@ -42,6 +44,7 @@ export type Database = {
           hire_id?: string | null
           id?: string
           kind?: string
+          org_id?: string
           send_error?: string | null
           task_id?: string | null
         }
@@ -51,6 +54,13 @@ export type Database = {
             columns: ["hire_id"]
             isOneToOne: false
             referencedRelation: "hires"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "alert_log_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
           {
@@ -71,6 +81,7 @@ export type Database = {
           decision: Database["public"]["Enums"]["approval_decision"]
           id: string
           note: string
+          org_id: string
           task_id: string
         }
         Insert: {
@@ -81,6 +92,7 @@ export type Database = {
           decision: Database["public"]["Enums"]["approval_decision"]
           id?: string
           note: string
+          org_id: string
           task_id: string
         }
         Update: {
@@ -91,9 +103,17 @@ export type Database = {
           decision?: Database["public"]["Enums"]["approval_decision"]
           id?: string
           note?: string
+          org_id?: string
           task_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "approvals_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "approvals_task_id_fkey"
             columns: ["task_id"]
@@ -115,6 +135,7 @@ export type Database = {
           id: string
           location: string | null
           on_call: boolean
+          org_id: string
           owning_team: string | null
           pii_access: boolean
           role: string
@@ -133,6 +154,7 @@ export type Database = {
           id?: string
           location?: string | null
           on_call?: boolean
+          org_id: string
           owning_team?: string | null
           pii_access?: boolean
           role: string
@@ -151,6 +173,7 @@ export type Database = {
           id?: string
           location?: string | null
           on_call?: boolean
+          org_id?: string
           owning_team?: string | null
           pii_access?: boolean
           role?: string
@@ -158,7 +181,15 @@ export type Database = {
           start_date?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "hires_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       onboarding_tasks: {
         Row: {
@@ -169,6 +200,7 @@ export type Database = {
           external_task_id: string | null
           hire_id: string
           id: string
+          org_id: string
           raw_response: string | null
           reason: string | null
           retry_count: number
@@ -185,6 +217,7 @@ export type Database = {
           external_task_id?: string | null
           hire_id: string
           id?: string
+          org_id: string
           raw_response?: string | null
           reason?: string | null
           retry_count?: number
@@ -201,6 +234,7 @@ export type Database = {
           external_task_id?: string | null
           hire_id?: string
           id?: string
+          org_id?: string
           raw_response?: string | null
           reason?: string | null
           retry_count?: number
@@ -217,17 +251,135 @@ export type Database = {
             referencedRelation: "hires"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "onboarding_tasks_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      org_connections: {
+        Row: {
+          connected_by: string | null
+          connection_key_ciphertext: string
+          connector_id: string
+          created_at: string
+          id: string
+          org_id: string
+          updated_at: string
+        }
+        Insert: {
+          connected_by?: string | null
+          connection_key_ciphertext: string
+          connector_id: string
+          created_at?: string
+          id?: string
+          org_id: string
+          updated_at?: string
+        }
+        Update: {
+          connected_by?: string | null
+          connection_key_ciphertext?: string
+          connector_id?: string
+          created_at?: string
+          id?: string
+          org_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "org_connections_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organization_members: {
+        Row: {
+          created_at: string
+          id: string
+          org_id: string
+          role: Database["public"]["Enums"]["org_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          org_id: string
+          role?: Database["public"]["Enums"]["org_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          org_id?: string
+          role?: Database["public"]["Enums"]["org_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_members_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organizations: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          name: string
+          resume_url: string | null
+          slack_alert_channel: string | null
+          slack_approval_channel: string | null
+          slug: string
+          updated_at: string
+          webhook_secret: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          name: string
+          resume_url?: string | null
+          slack_alert_channel?: string | null
+          slack_approval_channel?: string | null
+          slug: string
+          updated_at?: string
+          webhook_secret?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          name?: string
+          resume_url?: string | null
+          slack_alert_channel?: string | null
+          slack_approval_channel?: string | null
+          slug?: string
+          updated_at?: string
+          webhook_secret?: string
+        }
+        Relationships: []
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_org_member: { Args: { _org_id: string }; Returns: boolean }
+      is_org_owner: { Args: { _org_id: string }; Returns: boolean }
     }
     Enums: {
       approval_decision: "approved" | "rejected"
+      org_role: "owner" | "member"
       task_status:
         | "not_started"
         | "in_progress"
@@ -362,6 +514,7 @@ export const Constants = {
   public: {
     Enums: {
       approval_decision: ["approved", "rejected"],
+      org_role: ["owner", "member"],
       task_status: [
         "not_started",
         "in_progress",

@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
 import { notifyApprovalNeeded, notifyFailure, type TaskRow } from "@/lib/decisions.server";
-import { verifyViaSocketSignature, viaSocketSecretConfigured } from "@/lib/ops.server";
+import { loadOrgBySlug, verifyOrgSignature } from "@/lib/org-ops.server";
 
 const taskSchema = z.object({
   hire_external_id: z.string().min(1).max(200),
@@ -18,15 +18,16 @@ const taskSchema = z.object({
   raw_response: z.string().max(20000).optional().nullable(),
 });
 
-export const Route = createFileRoute("/api/public/viasocket/task")({
+export const Route = createFileRoute("/api/public/viasocket/$orgSlug/task")({
   server: {
     handlers: {
-      POST: async ({ request }) => {
+      POST: async ({ request, params }) => {
         const raw = await request.text();
-        if (!viaSocketSecretConfigured()) {
-          return Response.json({ error: "webhook secret not configured" }, { status: 503 });
-        }
-        if (!verifyViaSocketSignature(raw, request.headers.get("x-viasocket-signature"))) {
+        const org = await loadOrgBySlug(params.orgSlug);
+        if (!org) return Response.json({ error: "unknown organization" }, { status: 404 });
+        if (
+          !verifyOrgSignature(raw, request.headers.get("x-viasocket-signature"), org.webhook_secret)
+        ) {
           return Response.json({ error: "invalid signature" }, { status: 401 });
         }
 
@@ -49,6 +50,7 @@ export const Route = createFileRoute("/api/public/viasocket/task")({
         const { data: hire, error: hireError } = await supabaseAdmin
           .from("hires")
           .select("id, full_name, owning_team")
+          .eq("org_id", org.id)
           .eq("external_id", t.hire_external_id)
           .maybeSingle();
         if (hireError) {
@@ -71,6 +73,7 @@ export const Route = createFileRoute("/api/public/viasocket/task")({
           .from("onboarding_tasks")
           .upsert(
             {
+              org_id: org.id,
               hire_id: hire.id,
               external_task_id: t.external_task_id ?? null,
               system: t.system,
@@ -87,7 +90,7 @@ export const Route = createFileRoute("/api/public/viasocket/task")({
             { onConflict: "hire_id,system,action" },
           )
           .select(
-            "id, hire_id, system, action, reason, confidence, status, retry_count, error_message, raw_response, external_task_id",
+            "id, org_id, hire_id, system, action, reason, confidence, status, retry_count, error_message, raw_response, external_task_id",
           )
           .single();
 
@@ -96,16 +99,20 @@ export const Route = createFileRoute("/api/public/viasocket/task")({
           return Response.json({ error: "could not store task" }, { status: 500 });
         }
 
-        const statusChanged = previous?.status !== t.status;
-        if (statusChanged && t.status === "needs_human") {
-          const url = new URL(request.url);
-          await notifyApprovalNeeded(task as TaskRow, hire.full_name, url.origin);
-        }
-        if (statusChanged && t.status === "failed") {
-          await notifyFailure(task as TaskRow, hire.full_name, hire.owning_team);
+        const row = task as TaskRow;
+        const appUrl = new URL(request.url).origin;
+        try {
+          if (row.status === "needs_human" && previous?.status !== "needs_human") {
+            await notifyApprovalNeeded(org, row, hire.full_name, appUrl);
+          }
+          if (row.status === "failed" && previous?.status !== "failed") {
+            await notifyFailure(org, row, hire.full_name, hire.owning_team);
+          }
+        } catch (notifyError) {
+          console.error("notification failed", notifyError);
         }
 
-        return Response.json({ ok: true, task_id: task.id });
+        return Response.json({ ok: true, task_id: row.id });
       },
     },
   },

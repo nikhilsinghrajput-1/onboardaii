@@ -5,6 +5,7 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRealtimeRefresh } from "@/hooks/useRealtimeRefresh";
 import { countByStatus, hiresQuery, tasksQuery, type Task } from "@/lib/dashboard-data";
+import { useOrgContext } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -55,8 +56,10 @@ function StatCard({ label, value, tone }: { label: string; value: number; tone: 
 
 function DashboardPage() {
   useRealtimeRefresh();
-  const hires = useQuery(hiresQuery);
-  const tasks = useQuery(tasksQuery);
+  const { activeOrg } = useOrgContext();
+  const orgId = activeOrg?.id;
+  const hires = useQuery(hiresQuery(orgId));
+  const tasks = useQuery(tasksQuery(orgId));
 
   const byHire = new Map<string, Task[]>();
   for (const t of tasks.data ?? []) {

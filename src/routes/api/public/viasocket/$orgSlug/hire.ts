@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { z } from "zod";
 
-import { verifyViaSocketSignature, viaSocketSecretConfigured } from "@/lib/ops.server";
+import { loadOrgBySlug, verifyOrgSignature } from "@/lib/org-ops.server";
 
 const hireSchema = z.object({
   external_id: z.string().min(1).max(200),
@@ -19,15 +19,16 @@ const hireSchema = z.object({
   owning_team: z.string().max(200).optional().nullable(),
 });
 
-export const Route = createFileRoute("/api/public/viasocket/hire")({
+export const Route = createFileRoute("/api/public/viasocket/$orgSlug/hire")({
   server: {
     handlers: {
-      POST: async ({ request }) => {
+      POST: async ({ request, params }) => {
         const raw = await request.text();
-        if (!viaSocketSecretConfigured()) {
-          return Response.json({ error: "webhook secret not configured" }, { status: 503 });
-        }
-        if (!verifyViaSocketSignature(raw, request.headers.get("x-viasocket-signature"))) {
+        const org = await loadOrgBySlug(params.orgSlug);
+        if (!org) return Response.json({ error: "unknown organization" }, { status: 404 });
+        if (
+          !verifyOrgSignature(raw, request.headers.get("x-viasocket-signature"), org.webhook_secret)
+        ) {
           return Response.json({ error: "invalid signature" }, { status: 401 });
         }
 
@@ -51,6 +52,7 @@ export const Route = createFileRoute("/api/public/viasocket/hire")({
           .from("hires")
           .upsert(
             {
+              org_id: org.id,
               external_id: hire.external_id,
               full_name: hire.full_name,
               email: hire.email ?? null,
@@ -66,7 +68,7 @@ export const Route = createFileRoute("/api/public/viasocket/hire")({
               owning_team: hire.owning_team ?? null,
               updated_at: new Date().toISOString(),
             },
-            { onConflict: "external_id" },
+            { onConflict: "org_id,external_id" },
           )
           .select("id")
           .single();

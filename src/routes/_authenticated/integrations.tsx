@@ -1,22 +1,36 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
-import { getIntegrationStatus } from "@/lib/approvals.functions";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import { waitForOAuthCompletion } from "@/lib/appUserConnectorClient";
+import { getIntegrationStatus, saveOrgSettings } from "@/lib/approvals.functions";
+import {
+  completeOrgConnection,
+  disconnectOrgConnection,
+  listOrgConnections,
+  startOrgConnection,
+} from "@/lib/connections.functions";
+import { CONNECTOR_CATALOG } from "@/lib/connector-catalog";
+import { useOrgContext } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_authenticated/integrations")({
   head: () => ({
     meta: [
-      { title: "Flow wiring · Onboarding Control" },
+      { title: "Wiring · Onboarding Control" },
       {
         name: "description",
         content:
-          "Webhook endpoints, payload shapes, and connection status for wiring the onboarding automation flow into this dashboard.",
+          "Connect your organization's own tools, set the approval and alert channels, and copy the signed webhook endpoints your automation posts into.",
       },
-      { property: "og:title", content: "Flow wiring" },
+      { property: "og:title", content: "Wiring" },
       {
         property: "og:description",
-        content: "Endpoints and payloads the automation flow posts into this dashboard.",
+        content: "Connect your tools and copy the webhook endpoints for your organization.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -25,31 +39,10 @@ export const Route = createFileRoute("/_authenticated/integrations")({
   component: IntegrationsPage,
 });
 
-function Row({ label, ok, hint }: { label: string; ok: boolean; hint: string }) {
-  return (
-    <li className="flex flex-wrap items-center gap-3 p-4 text-sm">
-      <span className={`size-2 rounded-full ${ok ? "bg-ok" : "bg-destructive"}`} />
-      <span className="font-medium">{label}</span>
-      <span className="text-muted-foreground">{hint}</span>
-      <span className="ml-auto font-mono text-xs text-muted-foreground">
-        {ok ? "configured" : "missing"}
-      </span>
-    </li>
-  );
-}
-
-function Endpoint({
-  path,
-  description,
-  sample,
-}: {
-  path: string;
-  description: string;
-  sample: string;
-}) {
+function Endpoint({ path, description, sample }: { path: string; description: string; sample: string }) {
   return (
     <div className="rounded-xl border border-border/70 bg-card p-5">
-      <p className="font-mono text-sm text-wait">POST {path}</p>
+      <p className="font-mono text-sm break-all text-wait">POST {path}</p>
       <p className="mt-2 text-sm text-muted-foreground">{description}</p>
       <pre className="mt-3 overflow-auto rounded-lg bg-muted p-3 font-mono text-xs whitespace-pre-wrap">
         {sample}
@@ -59,58 +52,224 @@ function Endpoint({
 }
 
 function IntegrationsPage() {
+  const { activeOrg } = useOrgContext();
+  const orgId = activeOrg?.id;
+  const queryClient = useQueryClient();
+
   const fetchStatus = useServerFn(getIntegrationStatus);
-  const status = useQuery({ queryKey: ["integration-status"], queryFn: () => fetchStatus() });
+  const fetchConnections = useServerFn(listOrgConnections);
+  const startConnect = useServerFn(startOrgConnection);
+  const completeConnect = useServerFn(completeOrgConnection);
+  const removeConnect = useServerFn(disconnectOrgConnection);
+  const saveSettings = useServerFn(saveOrgSettings);
+
+  const status = useQuery({
+    queryKey: ["integration-status", orgId],
+    enabled: Boolean(orgId),
+    queryFn: () => fetchStatus({ data: { orgId: orgId! } }),
+  });
+  const connections = useQuery({
+    queryKey: ["org-connections", orgId],
+    enabled: Boolean(orgId),
+    queryFn: () => fetchConnections({ data: { orgId: orgId! } }),
+  });
+
+  const [approval, setApproval] = useState("");
+  const [alert, setAlert] = useState("");
+  const [resume, setResume] = useState("");
+  const [busyConnector, setBusyConnector] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!status.data) return;
+    setApproval(status.data.approvalChannel ?? "");
+    setAlert(status.data.alertChannel ?? "");
+    setResume(status.data.resumeUrl ?? "");
+  }, [status.data]);
+
+  const settingsMutation = useMutation({
+    mutationFn: () =>
+      saveSettings({
+        data: {
+          orgId: orgId!,
+          slackApprovalChannel: approval.trim() || null,
+          slackAlertChannel: alert.trim() || null,
+          resumeUrl: resume.trim() || null,
+        },
+      }),
+    onSuccess: () => {
+      toast.success("Saved.");
+      void queryClient.invalidateQueries({ queryKey: ["integration-status", orgId] });
+      void queryClient.invalidateQueries({ queryKey: ["organizations"] });
+    },
+    onError: (error) =>
+      toast.error(error instanceof Error ? error.message : "Could not save those settings."),
+  });
+
+  async function connect(connectorId: string) {
+    if (!orgId) return;
+    setBusyConnector(connectorId);
+    const popup = window.open("", "lovable-oauth", "width=600,height=720");
+    if (!popup) {
+      setBusyConnector(null);
+      toast.error("Allow popups for this site and try again.");
+      return;
+    }
+    try {
+      const { authorizationUrl } = await startConnect({ data: { orgId, connectorId } });
+      const completion = waitForOAuthCompletion(popup, connectorId);
+      popup.location.href = authorizationUrl;
+      const code = await completion;
+      if (code) await completeConnect({ data: { orgId, connectorId, code } });
+      toast.success("Connected.");
+      await queryClient.invalidateQueries({ queryKey: ["org-connections", orgId] });
+      await queryClient.invalidateQueries({ queryKey: ["integration-status", orgId] });
+    } catch (error) {
+      popup.close();
+      toast.error(error instanceof Error ? error.message : "Could not connect that tool.");
+    } finally {
+      setBusyConnector(null);
+    }
+  }
+
+  async function disconnect(connectorId: string) {
+    if (!orgId) return;
+    setBusyConnector(connectorId);
+    try {
+      await removeConnect({ data: { orgId, connectorId } });
+      toast.success("Disconnected.");
+      await queryClient.invalidateQueries({ queryKey: ["org-connections", orgId] });
+      await queryClient.invalidateQueries({ queryKey: ["integration-status", orgId] });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Could not disconnect that tool.");
+    } finally {
+      setBusyConnector(null);
+    }
+  }
+
   const origin = typeof window === "undefined" ? "" : window.location.origin;
+  const slug = status.data?.slug ?? activeOrg?.slug ?? "your-org";
 
   return (
     <main className="mx-auto max-w-4xl px-6 py-10">
-      <h1 className="text-2xl font-semibold tracking-tight">Flow wiring</h1>
+      <h1 className="text-2xl font-semibold tracking-tight">Wiring</h1>
       <p className="mt-1 text-sm text-muted-foreground">
-        The automation flow keeps running the reasoning, dispatch, and retries. It pushes state here
-        and this dashboard pushes decisions back.
+        {activeOrg?.name ?? "This organization"} connects its own tools here. The automation keeps
+        running the reasoning, dispatch, and retries — it pushes state into the endpoints below and
+        this dashboard pushes decisions back.
       </p>
 
-      <ul className="mt-8 divide-y divide-border/70 rounded-xl border border-border/70 bg-card">
-        <Row
-          label="Webhook signing secret"
-          ok={Boolean(status.data?.webhookSecret)}
-          hint="Signs every inbound hire and task payload"
-        />
-        <Row
-          label="Slack connection"
-          ok={Boolean(status.data?.slack)}
-          hint="Approval requests and failure alerts"
-        />
-        <Row
-          label="Approval channel"
-          ok={Boolean(status.data?.approvalChannel)}
-          hint="Where Approve / Reject messages are posted"
-        />
-        <Row
-          label="Alert channel"
-          ok={Boolean(status.data?.alertChannel)}
-          hint="Where failed-after-retries alerts go"
-        />
-        <Row
-          label="Flow resume URL"
-          ok={Boolean(status.data?.resumeUrl)}
-          hint="Called after every human decision so the flow continues or halts"
-        />
-      </ul>
-
-      <section className="mt-10 space-y-4">
+      <section className="mt-10">
         <h2 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-          Endpoints
+          Your tools
+        </h2>
+        {connections.isLoading && <Skeleton className="mt-3 h-32 w-full" />}
+        <ul className="mt-3 grid gap-3 sm:grid-cols-2">
+          {CONNECTOR_CATALOG.map((spec) => {
+            const state = connections.data?.find((c) => c.id === spec.id);
+            const connected = Boolean(state?.connected);
+            const available = state?.available ?? true;
+            return (
+              <li key={spec.id} className="rounded-xl border border-border/70 bg-card p-5">
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`size-2 rounded-full ${connected ? "bg-ok" : "bg-muted-foreground/40"}`}
+                  />
+                  <span className="font-medium">{spec.label}</span>
+                  {connected && <span className="ml-auto text-xs text-ok">connected</span>}
+                </div>
+                <p className="mt-2 text-sm text-muted-foreground">{spec.blurb}</p>
+                <div className="mt-4">
+                  {connected ? (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={busyConnector === spec.id}
+                      onClick={() => void disconnect(spec.id)}
+                    >
+                      Disconnect
+                    </Button>
+                  ) : (
+                    <Button
+                      size="sm"
+                      disabled={busyConnector === spec.id || !available}
+                      onClick={() => void connect(spec.id)}
+                    >
+                      {busyConnector === spec.id ? "Connecting…" : "Connect"}
+                    </Button>
+                  )}
+                  {!connected && !available && (
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      Not enabled for this app yet.
+                    </p>
+                  )}
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+
+      <section className="mt-12 rounded-xl border border-border/70 bg-card p-6">
+        <h2 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+          Notifications and callbacks
+        </h2>
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          <label className="text-sm">
+            <span className="text-muted-foreground">Approval channel ID</span>
+            <Input
+              className="mt-1"
+              value={approval}
+              onChange={(e) => setApproval(e.target.value)}
+              placeholder="C0123456789"
+            />
+          </label>
+          <label className="text-sm">
+            <span className="text-muted-foreground">Alert channel ID</span>
+            <Input
+              className="mt-1"
+              value={alert}
+              onChange={(e) => setAlert(e.target.value)}
+              placeholder="C0987654321"
+            />
+          </label>
+          <label className="text-sm sm:col-span-2">
+            <span className="text-muted-foreground">Flow resume URL</span>
+            <Input
+              className="mt-1"
+              value={resume}
+              onChange={(e) => setResume(e.target.value)}
+              placeholder="https://flow.viasocket.com/hooks/…"
+            />
+          </label>
+        </div>
+        <Button
+          className="mt-4"
+          size="sm"
+          disabled={!orgId || settingsMutation.isPending}
+          onClick={() => settingsMutation.mutate()}
+        >
+          {settingsMutation.isPending ? "Saving…" : "Save"}
+        </Button>
+      </section>
+
+      <section className="mt-12 space-y-4">
+        <h2 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
+          Endpoints for {slug}
         </h2>
         <p className="text-sm text-muted-foreground">
-          Sign the raw JSON body with HMAC-SHA256 using the shared secret and send it as{" "}
-          <code className="font-mono text-xs">x-viasocket-signature</code>. Unsigned calls are
+          Sign the raw JSON body with HMAC-SHA256 using this organization's signing secret and send
+          it as <code className="font-mono text-xs">x-viasocket-signature</code>. Unsigned calls are
           rejected.
         </p>
+        <div className="rounded-xl border border-border/70 bg-card p-5">
+          <p className="text-sm text-muted-foreground">Signing secret</p>
+          <p className="mt-1 font-mono text-xs break-all">
+            {status.data?.webhookSecret ?? "loading…"}
+          </p>
+        </div>
         <Endpoint
-          path={`${origin}/api/public/viasocket/hire`}
-          description="Called when a new hire record is created in the HR system. Upserts on external_id."
+          path={`${origin}/api/public/viasocket/${slug}/hire`}
+          description="Called when a new hire record is created. Upserts on external_id within your organization."
           sample={`{
   "external_id": "WD-10044",
   "full_name": "Sam Okafor",
@@ -128,8 +287,8 @@ function IntegrationsPage() {
 }`}
         />
         <Endpoint
-          path={`${origin}/api/public/viasocket/task`}
-          description="Called after every action step. Upserts one row per (hire, system, action). A first-time needs_human posts an approval request to Slack; a first-time failed fires the alert with the raw response attached."
+          path={`${origin}/api/public/viasocket/${slug}/task`}
+          description="Called after every action step. A first-time needs_human posts an approval request; a first-time failed fires the alert with the raw response attached."
           sample={`{
   "hire_external_id": "WD-10044",
   "external_task_id": "T-88",
@@ -146,31 +305,9 @@ function IntegrationsPage() {
         />
         <Endpoint
           path={`${origin}/api/public/slack/events`}
-          description="Slack interactivity endpoint. Approve / Reject buttons write the same decision as the in-app queue, verified with the Slack signing secret."
+          description="Slack interactivity endpoint. Approve / Reject buttons write the same decision as the in-app queue."
           sample={`Set this URL as the Interactivity request URL on the Slack app.`}
         />
-      </section>
-
-      <section className="mt-10">
-        <h2 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-          Decision callback
-        </h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          After every approve or reject, this app POSTs to the configured flow resume URL:
-        </p>
-        <pre className="mt-3 overflow-auto rounded-lg bg-muted p-3 font-mono text-xs whitespace-pre-wrap">
-          {`{
-  "event": "approval_decision",
-  "task_id": "…",
-  "external_task_id": "T-88",
-  "hire_external_id": "WD-10044",
-  "system": "Okta",
-  "action": "assign_pii_training_group",
-  "decision": "approved",
-  "note": "Training group is required, access itself unchanged",
-  "decided_by": "ops@example.com"
-}`}
-        </pre>
       </section>
     </main>
   );
