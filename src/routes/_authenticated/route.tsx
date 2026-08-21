@@ -46,7 +46,7 @@ function Shell() {
             className="ml-auto"
             onClick={async () => {
               await supabase.auth.signOut();
-              navigate({ to: "/auth" });
+              navigate({ to: "/auth", search: {} });
             }}
           >
             Sign out
