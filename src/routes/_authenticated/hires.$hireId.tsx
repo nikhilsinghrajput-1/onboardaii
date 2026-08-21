@@ -106,6 +106,8 @@ function HireDetail() {
         </div>
       </dl>
 
+      <HireChannelCard hire={hire} orgId={orgId} />
+
       <div className="mt-8 flex flex-wrap gap-2">
         {FILTERS.map((f) => (
           <button
