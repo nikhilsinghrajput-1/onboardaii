@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 
+import { NewHireDialog } from "@/components/NewHireDialog";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRealtimeRefresh } from "@/hooks/useRealtimeRefresh";
