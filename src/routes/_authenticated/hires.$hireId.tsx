@@ -14,6 +14,7 @@ import {
   tasksQuery,
   type TaskStatus,
 } from "@/lib/dashboard-data";
+import { useOrgContext } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_authenticated/hires/$hireId")({
   head: () => ({
@@ -48,9 +49,11 @@ const FILTERS: (TaskStatus | "all")[] = [
 function HireDetail() {
   useRealtimeRefresh();
   const { hireId } = Route.useParams();
-  const hires = useQuery(hiresQuery);
-  const tasks = useQuery(tasksQuery);
-  const approvals = useQuery(approvalsQuery);
+  const { activeOrg } = useOrgContext();
+  const orgId = activeOrg?.id;
+  const hires = useQuery(hiresQuery(orgId));
+  const tasks = useQuery(tasksQuery(orgId));
+  const approvals = useQuery(approvalsQuery(orgId));
   const [filter, setFilter] = useState<TaskStatus | "all">("all");
   const [open, setOpen] = useState<string | null>(null);
 

@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useRealtimeRefresh } from "@/hooks/useRealtimeRefresh";
 import { decideTask } from "@/lib/approvals.functions";
 import { approvalsQuery, hiresQuery, tasksQuery } from "@/lib/dashboard-data";
+import { useOrgContext } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_authenticated/approvals")({
   head: () => ({
@@ -35,9 +36,11 @@ export const Route = createFileRoute("/_authenticated/approvals")({
 function ApprovalsPage() {
   useRealtimeRefresh();
   const queryClient = useQueryClient();
-  const hires = useQuery(hiresQuery);
-  const tasks = useQuery(tasksQuery);
-  const approvals = useQuery(approvalsQuery);
+  const { activeOrg } = useOrgContext();
+  const orgId = activeOrg?.id;
+  const hires = useQuery(hiresQuery(orgId));
+  const tasks = useQuery(tasksQuery(orgId));
+  const approvals = useQuery(approvalsQuery(orgId));
   const decide = useServerFn(decideTask);
   const [notes, setNotes] = useState<Record<string, string>>({});
 
