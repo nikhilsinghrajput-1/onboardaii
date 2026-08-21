@@ -1,0 +1,1 @@
+DELETE FROM public.hires WHERE external_id = 'e2e-001';
