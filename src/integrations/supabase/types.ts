@@ -374,6 +374,27 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_organization: {
+        Args: { _name: string; _slug: string }
+        Returns: {
+          created_at: string
+          created_by: string
+          id: string
+          name: string
+          resume_url: string | null
+          slack_alert_channel: string | null
+          slack_approval_channel: string | null
+          slug: string
+          updated_at: string
+          webhook_secret: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "organizations"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       is_org_member: { Args: { _org_id: string }; Returns: boolean }
       is_org_owner: { Args: { _org_id: string }; Returns: boolean }
     }
