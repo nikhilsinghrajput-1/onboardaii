@@ -46,7 +46,7 @@ function ApprovalsPage() {
 
   const mutation = useMutation({
     mutationFn: (vars: { taskId: string; decision: "approved" | "rejected"; note: string }) =>
-      decide({ data: vars }),
+      decide({ data: { ...vars, orgId: orgId! } }),
     onSuccess: (result) => {
       if (!result.ok) {
         toast.error(result.message ?? "Nothing to record.");
