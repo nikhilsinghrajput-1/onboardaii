@@ -100,6 +100,9 @@
   --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
   --sidebar-border: oklch(0.929 0.013 255.508);
   --sidebar-ring: oklch(0.704 0.04 256.788);
+  --ok: oklch(0.62 0.13 162);
+  --run: oklch(0.62 0.15 245);
+  --wait: oklch(0.72 0.16 75);
 }
 
 .dark {
@@ -135,6 +138,9 @@
   --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.551 0.027 264.364);
+  --ok: oklch(0.75 0.14 162);
+  --run: oklch(0.72 0.14 245);
+  --wait: oklch(0.82 0.15 78);
 }
 
 @layer base {
@@ -143,6 +149,7 @@
   }
 
   body {
+    font-family: var(--font-sans);
     background-color: var(--color-background);
     color: var(--color-foreground);
   }
