@@ -24,6 +24,9 @@ export type Hire = {
   on_call: boolean;
   direct_reports: boolean;
   owning_team: string | null;
+  slack_channel_id: string | null;
+  slack_channel_name: string | null;
+  slack_channel_error: string | null;
   created_at: string;
 };
 
