@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiPublicViasocketHireRouteImport } from './routes/api/public/viasocket/hire'
+import { Route as ApiPublicViasocketTaskRouteImport } from './routes/api/public/viasocket/task'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,31 +23,44 @@ const ApiPublicViasocketHireRoute = ApiPublicViasocketHireRouteImport.update({
   path: '/api/public/viasocket/hire',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicViasocketTaskRoute = ApiPublicViasocketTaskRouteImport.update({
+  id: '/api/public/viasocket/task',
+  path: '/api/public/viasocket/task',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/api/public/viasocket/hire': typeof ApiPublicViasocketHireRoute
+  '/api/public/viasocket/task': typeof ApiPublicViasocketTaskRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/api/public/viasocket/hire': typeof ApiPublicViasocketHireRoute
+  '/api/public/viasocket/task': typeof ApiPublicViasocketTaskRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/api/public/viasocket/hire': typeof ApiPublicViasocketHireRoute
+  '/api/public/viasocket/task': typeof ApiPublicViasocketTaskRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/api/public/viasocket/hire'
+  fullPaths: '/' | '/api/public/viasocket/hire' | '/api/public/viasocket/task'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/api/public/viasocket/hire'
-  id: '__root__' | '/' | '/api/public/viasocket/hire'
+  to: '/' | '/api/public/viasocket/hire' | '/api/public/viasocket/task'
+  id:
+    | '__root__'
+    | '/'
+    | '/api/public/viasocket/hire'
+    | '/api/public/viasocket/task'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ApiPublicViasocketHireRoute: typeof ApiPublicViasocketHireRoute
+  ApiPublicViasocketTaskRoute: typeof ApiPublicViasocketTaskRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +79,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicViasocketHireRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/viasocket/task': {
+      id: '/api/public/viasocket/task'
+      path: '/api/public/viasocket/task'
+      fullPath: '/api/public/viasocket/task'
+      preLoaderRoute: typeof ApiPublicViasocketTaskRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ApiPublicViasocketHireRoute: ApiPublicViasocketHireRoute,
+  ApiPublicViasocketTaskRoute: ApiPublicViasocketTaskRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
