@@ -131,6 +131,15 @@ function DashboardPage() {
                     Direct reports
                   </span>
                 )}
+                <span
+                  className={`rounded-full border px-2 py-0.5 font-mono text-xs ${
+                    hire.slack_channel_id
+                      ? "border-ok/40 bg-ok/10 text-ok"
+                      : "border-border text-muted-foreground"
+                  }`}
+                >
+                  {hire.slack_channel_id ? `#${hire.slack_channel_name}` : "no Slack channel"}
+                </span>
               </div>
               <div className="ml-auto flex flex-wrap items-center gap-2">
                 {counts.needs_human > 0 && (
