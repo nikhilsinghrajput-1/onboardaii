@@ -10,33 +10,147 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedApprovalsRouteImport } from './routes/_authenticated/approvals'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedIntegrationsRouteImport } from './routes/_authenticated/integrations'
+import { Route as AuthenticatedHiresHireIdRouteImport } from './routes/_authenticated/hires.$hireId'
+import { Route as ApiPublicSlackEventsRouteImport } from './routes/api/public/slack/events'
+import { Route as ApiPublicViasocketHireRouteImport } from './routes/api/public/viasocket/hire'
+import { Route as ApiPublicViasocketTaskRouteImport } from './routes/api/public/viasocket/task'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedApprovalsRoute = AuthenticatedApprovalsRouteImport.update({
+  id: '/approvals',
+  path: '/approvals',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedIntegrationsRoute =
+  AuthenticatedIntegrationsRouteImport.update({
+    id: '/integrations',
+    path: '/integrations',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedHiresHireIdRoute =
+  AuthenticatedHiresHireIdRouteImport.update({
+    id: '/hires/$hireId',
+    path: '/hires/$hireId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const ApiPublicSlackEventsRoute = ApiPublicSlackEventsRouteImport.update({
+  id: '/api/public/slack/events',
+  path: '/api/public/slack/events',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicViasocketHireRoute = ApiPublicViasocketHireRouteImport.update({
+  id: '/api/public/viasocket/hire',
+  path: '/api/public/viasocket/hire',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicViasocketTaskRoute = ApiPublicViasocketTaskRouteImport.update({
+  id: '/api/public/viasocket/task',
+  path: '/api/public/viasocket/task',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/approvals': typeof AuthenticatedApprovalsRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/integrations': typeof AuthenticatedIntegrationsRoute
+  '/hires/$hireId': typeof AuthenticatedHiresHireIdRoute
+  '/api/public/slack/events': typeof ApiPublicSlackEventsRoute
+  '/api/public/viasocket/hire': typeof ApiPublicViasocketHireRoute
+  '/api/public/viasocket/task': typeof ApiPublicViasocketTaskRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/approvals': typeof AuthenticatedApprovalsRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/integrations': typeof AuthenticatedIntegrationsRoute
+  '/hires/$hireId': typeof AuthenticatedHiresHireIdRoute
+  '/api/public/slack/events': typeof ApiPublicSlackEventsRoute
+  '/api/public/viasocket/hire': typeof ApiPublicViasocketHireRoute
+  '/api/public/viasocket/task': typeof ApiPublicViasocketTaskRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/_authenticated/approvals': typeof AuthenticatedApprovalsRoute
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/integrations': typeof AuthenticatedIntegrationsRoute
+  '/_authenticated/hires/$hireId': typeof AuthenticatedHiresHireIdRoute
+  '/api/public/slack/events': typeof ApiPublicSlackEventsRoute
+  '/api/public/viasocket/hire': typeof ApiPublicViasocketHireRoute
+  '/api/public/viasocket/task': typeof ApiPublicViasocketTaskRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/approvals'
+    | '/dashboard'
+    | '/integrations'
+    | '/hires/$hireId'
+    | '/api/public/slack/events'
+    | '/api/public/viasocket/hire'
+    | '/api/public/viasocket/task'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/approvals'
+    | '/dashboard'
+    | '/integrations'
+    | '/hires/$hireId'
+    | '/api/public/slack/events'
+    | '/api/public/viasocket/hire'
+    | '/api/public/viasocket/task'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/_authenticated/approvals'
+    | '/_authenticated/dashboard'
+    | '/_authenticated/integrations'
+    | '/_authenticated/hires/$hireId'
+    | '/api/public/slack/events'
+    | '/api/public/viasocket/hire'
+    | '/api/public/viasocket/task'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
+  ApiPublicSlackEventsRoute: typeof ApiPublicSlackEventsRoute
+  ApiPublicViasocketHireRoute: typeof ApiPublicViasocketHireRoute
+  ApiPublicViasocketTaskRoute: typeof ApiPublicViasocketTaskRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +162,96 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/approvals': {
+      id: '/_authenticated/approvals'
+      path: '/approvals'
+      fullPath: '/approvals'
+      preLoaderRoute: typeof AuthenticatedApprovalsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/integrations': {
+      id: '/_authenticated/integrations'
+      path: '/integrations'
+      fullPath: '/integrations'
+      preLoaderRoute: typeof AuthenticatedIntegrationsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/hires/$hireId': {
+      id: '/_authenticated/hires/$hireId'
+      path: '/hires/$hireId'
+      fullPath: '/hires/$hireId'
+      preLoaderRoute: typeof AuthenticatedHiresHireIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/api/public/slack/events': {
+      id: '/api/public/slack/events'
+      path: '/api/public/slack/events'
+      fullPath: '/api/public/slack/events'
+      preLoaderRoute: typeof ApiPublicSlackEventsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/viasocket/hire': {
+      id: '/api/public/viasocket/hire'
+      path: '/api/public/viasocket/hire'
+      fullPath: '/api/public/viasocket/hire'
+      preLoaderRoute: typeof ApiPublicViasocketHireRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/viasocket/task': {
+      id: '/api/public/viasocket/task'
+      path: '/api/public/viasocket/task'
+      fullPath: '/api/public/viasocket/task'
+      preLoaderRoute: typeof ApiPublicViasocketTaskRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedApprovalsRoute: typeof AuthenticatedApprovalsRoute
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedIntegrationsRoute: typeof AuthenticatedIntegrationsRoute
+  AuthenticatedHiresHireIdRoute: typeof AuthenticatedHiresHireIdRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedApprovalsRoute: AuthenticatedApprovalsRoute,
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedIntegrationsRoute: AuthenticatedIntegrationsRoute,
+  AuthenticatedHiresHireIdRoute: AuthenticatedHiresHireIdRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
+  ApiPublicSlackEventsRoute: ApiPublicSlackEventsRoute,
+  ApiPublicViasocketHireRoute: ApiPublicViasocketHireRoute,
+  ApiPublicViasocketTaskRoute: ApiPublicViasocketTaskRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
