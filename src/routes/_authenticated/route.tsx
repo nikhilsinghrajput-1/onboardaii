@@ -97,6 +97,7 @@ function Shell() {
                 { to: "/dashboard", label: "Hires" },
                 { to: "/approvals", label: "Approvals" },
                 { to: "/integrations", label: "Wiring" },
+                { to: "/relay", label: "Relay" },
               ].map((item) => (
                 <Link
                   key={item.to}
