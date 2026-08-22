@@ -47,8 +47,10 @@ export async function triggerHireFlow(
   // One-time temporary password for the Google Workspace create-user step in the
   // flow. Generated per dispatch and never stored in the database.
   const tempPassword = `Ob-${randomBytes(9).toString("base64url")}!7`;
+  // Dates are normalized to YYYY-MM-DD strings for the automation.
+  const startDate = hire.start_date ? String(hire.start_date).slice(0, 10) : null;
   const payload = {
-    event: "hire.created",
+    event: "employee.onboarding",
     org: { id: org.id, slug: org.slug, name: org.name },
     hire: {
       id: hire.id,
@@ -60,14 +62,14 @@ export async function triggerHireFlow(
       seniority: hire.seniority,
       employment_type: hire.employment_type,
       location: hire.location,
-      start_date: hire.start_date,
-      pii_access: hire.pii_access,
-      on_call: hire.on_call,
-      direct_reports: hire.direct_reports,
+      start_date: startDate,
+      pii_access: Boolean(hire.pii_access),
+      on_call: Boolean(hire.on_call),
+      direct_reports: Number(hire.direct_reports ?? 0),
       owning_team: hire.owning_team,
       temp_password: tempPassword,
     },
-    slack: { channel_name: hire.slack_channel_name },
+    slack: { channel_name: hire.slack_channel_name || "general" },
     callbacks: {
       task_url: `${origin}/api/public/viasocket/${org.slug}/task`,
       hire_url: `${origin}/api/public/viasocket/${org.slug}/hire`,
@@ -75,7 +77,9 @@ export async function triggerHireFlow(
   };
 
   const body = JSON.stringify(payload);
-  const signature = createHmac("sha256", org.webhook_secret).update(body).digest("hex");
+  // Server-only signing secret; falls back to the org's own Wiring secret.
+  const signingSecret = process.env["ONBOARDING_WEBHOOK_SECRET"] || org.webhook_secret;
+  const signature = createHmac("sha256", signingSecret).update(body).digest("hex");
 
   let result: FlowTriggerResult;
   try {
@@ -84,7 +88,7 @@ export async function triggerHireFlow(
       headers: {
         "Content-Type": "application/json",
         "x-onboard-signature": `sha256=${signature}`,
-        "x-onboard-event": "hire.created",
+        "x-onboard-event": "employee.onboarding",
       },
       body,
     });
