@@ -77,6 +77,7 @@ function IntegrationsPage() {
   const [approval, setApproval] = useState("");
   const [alert, setAlert] = useState("");
   const [resume, setResume] = useState("");
+  const [trigger, setTrigger] = useState("");
   const [busyConnector, setBusyConnector] = useState<string | null>(null);
 
   useEffect(() => {
@@ -84,6 +85,7 @@ function IntegrationsPage() {
     setApproval(status.data.approvalChannel ?? "");
     setAlert(status.data.alertChannel ?? "");
     setResume(status.data.resumeUrl ?? "");
+    setTrigger(status.data.flowTriggerUrl ?? "");
   }, [status.data]);
 
   const settingsMutation = useMutation({
@@ -94,6 +96,7 @@ function IntegrationsPage() {
           slackApprovalChannel: approval.trim() || null,
           slackAlertChannel: alert.trim() || null,
           resumeUrl: resume.trim() || null,
+          flowTriggerUrl: trigger.trim() || null,
         },
       }),
     onSuccess: () => {
