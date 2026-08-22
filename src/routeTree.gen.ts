@@ -16,6 +16,7 @@ import { Route as AuthenticatedApprovalsRouteImport } from './routes/_authentica
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedIntegrationsRouteImport } from './routes/_authenticated/integrations'
 import { Route as AuthenticatedOrgsRouteImport } from './routes/_authenticated/orgs'
+import { Route as AuthenticatedRelayRouteImport } from './routes/_authenticated/relay'
 import { Route as AuthenticatedHiresHireIdRouteImport } from './routes/_authenticated/hires.$hireId'
 import { Route as OauthConnectorReturnRouteImport } from './routes/oauth/$connector/return'
 import { Route as ApiPublicOnboardingHealthRouteImport } from './routes/api/public/onboarding/health'
@@ -58,6 +59,11 @@ const AuthenticatedIntegrationsRoute =
 const AuthenticatedOrgsRoute = AuthenticatedOrgsRouteImport.update({
   id: '/orgs',
   path: '/orgs',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedRelayRoute = AuthenticatedRelayRouteImport.update({
+  id: '/relay',
+  path: '/relay',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedHiresHireIdRoute =
@@ -114,6 +120,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/integrations': typeof AuthenticatedIntegrationsRoute
   '/orgs': typeof AuthenticatedOrgsRoute
+  '/relay': typeof AuthenticatedRelayRoute
   '/hires/$hireId': typeof AuthenticatedHiresHireIdRoute
   '/oauth/$connector/return': typeof OauthConnectorReturnRoute
   '/api/public/onboarding/health': typeof ApiPublicOnboardingHealthRoute
@@ -130,6 +137,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/integrations': typeof AuthenticatedIntegrationsRoute
   '/orgs': typeof AuthenticatedOrgsRoute
+  '/relay': typeof AuthenticatedRelayRoute
   '/hires/$hireId': typeof AuthenticatedHiresHireIdRoute
   '/oauth/$connector/return': typeof OauthConnectorReturnRoute
   '/api/public/onboarding/health': typeof ApiPublicOnboardingHealthRoute
@@ -148,6 +156,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/integrations': typeof AuthenticatedIntegrationsRoute
   '/_authenticated/orgs': typeof AuthenticatedOrgsRoute
+  '/_authenticated/relay': typeof AuthenticatedRelayRoute
   '/_authenticated/hires/$hireId': typeof AuthenticatedHiresHireIdRoute
   '/oauth/$connector/return': typeof OauthConnectorReturnRoute
   '/api/public/onboarding/health': typeof ApiPublicOnboardingHealthRoute
@@ -166,6 +175,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/integrations'
     | '/orgs'
+    | '/relay'
     | '/hires/$hireId'
     | '/oauth/$connector/return'
     | '/api/public/onboarding/health'
@@ -182,6 +192,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/integrations'
     | '/orgs'
+    | '/relay'
     | '/hires/$hireId'
     | '/oauth/$connector/return'
     | '/api/public/onboarding/health'
@@ -199,6 +210,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/integrations'
     | '/_authenticated/orgs'
+    | '/_authenticated/relay'
     | '/_authenticated/hires/$hireId'
     | '/oauth/$connector/return'
     | '/api/public/onboarding/health'
@@ -273,6 +285,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOrgsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/relay': {
+      id: '/_authenticated/relay'
+      path: '/relay'
+      fullPath: '/relay'
+      preLoaderRoute: typeof AuthenticatedRelayRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/hires/$hireId': {
       id: '/_authenticated/hires/$hireId'
       path: '/hires/$hireId'
@@ -337,6 +356,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedIntegrationsRoute: typeof AuthenticatedIntegrationsRoute
   AuthenticatedOrgsRoute: typeof AuthenticatedOrgsRoute
+  AuthenticatedRelayRoute: typeof AuthenticatedRelayRoute
   AuthenticatedHiresHireIdRoute: typeof AuthenticatedHiresHireIdRoute
 }
 
@@ -345,6 +365,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedIntegrationsRoute: AuthenticatedIntegrationsRoute,
   AuthenticatedOrgsRoute: AuthenticatedOrgsRoute,
+  AuthenticatedRelayRoute: AuthenticatedRelayRoute,
   AuthenticatedHiresHireIdRoute: AuthenticatedHiresHireIdRoute,
 }
 
