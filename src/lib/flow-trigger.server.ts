@@ -29,7 +29,7 @@ export async function triggerHireFlow(
     return {
       ok: false,
       skipped: true,
-      error: "No flow trigger URL is set for this organization (Wiring → Flow trigger URL).",
+      error: "No flow trigger URL is set. Go to Wiring → Flow trigger URL and paste your viaSocket catch-hook URL.",
     };
   }
 
