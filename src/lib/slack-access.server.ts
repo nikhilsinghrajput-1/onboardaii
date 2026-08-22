@@ -15,7 +15,7 @@ async function recordTask(
   orgId: string,
   hireId: string,
   action: string,
-  status: "completed" | "failed",
+  status: "completed" | "failed" | "needs_human",
   detail: { reason: string; error?: string | null; raw?: string | null },
 ) {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
