@@ -8,8 +8,15 @@ const channelInput = z.object({
   hireId: z.string().uuid(),
 });
 
+const triggerInput = z.object({
+  orgId: z.string().uuid(),
+  hireId: z.string().uuid(),
+  appOrigin: z.string().url().max(500),
+});
+
 const newHireInput = z.object({
   orgId: z.string().uuid(),
+  appOrigin: z.string().url().max(500),
   fullName: z.string().trim().min(1).max(200),
   role: z.string().trim().min(1).max(200),
   email: z.string().trim().email().max(320),
