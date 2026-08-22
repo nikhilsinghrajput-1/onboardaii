@@ -72,12 +72,7 @@ export const createHire = createServerFn({ method: "POST" })
       .single();
     if (error) throw new Error(error.message);
 
-    const { ensureHireChannel } = await import("./slack-channels.server");
-    const { grantSlackAccess } = await import("./slack-access.server");
-
-    const channel = await ensureHireChannel(data.orgId, hire.id).catch(() => null);
-    const access = await grantSlackAccess(data.orgId, hire.id).catch(() => null);
-
+    // Slack provisioning is owned by the automation flow, not this app.
     // Kick off the organization's automation flow with the finished hire record.
     const { triggerHireFlow } = await import("./flow-trigger.server");
     const flow = await triggerHireFlow(data.orgId, hire.id, data.appOrigin).catch(
