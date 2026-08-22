@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import { ApprovalAdvice } from "@/components/ApprovalAdvice";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -15,7 +16,7 @@ import { useOrgContext } from "@/lib/org-context";
 export const Route = createFileRoute("/_authenticated/approvals")({
   head: () => ({
     meta: [
-      { title: "Approval queue · Acropolis Onboarding" },
+      { title: "Approvals · Keystone onboarding operations" },
       {
         name: "description",
         content:
@@ -110,6 +111,8 @@ function ApprovalsPage() {
                   confidence.
                 </p>
               )}
+              <ApprovalAdvice orgId={orgId} taskId={task.id} />
+
               <Textarea
                 className="mt-4"
                 rows={2}

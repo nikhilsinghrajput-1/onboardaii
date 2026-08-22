@@ -121,3 +121,66 @@ export function countByStatus(tasks: Task[]) {
   for (const t of tasks) counts[t.status] += 1;
   return counts;
 }
+
+export type ActivityEntry = {
+  id: string;
+  hire_id: string | null;
+  tool: string;
+  action: string;
+  outcome: string;
+  detail: string | null;
+  created_at: string;
+};
+
+export const activityQuery = (orgId: string | undefined) =>
+  queryOptions({
+    queryKey: ["activity", orgId],
+    enabled: Boolean(orgId),
+    queryFn: async (): Promise<ActivityEntry[]> => {
+      const { data, error } = await supabase
+        .from("activity_log")
+        .select("id, hire_id, tool, action, outcome, detail, created_at")
+        .eq("org_id", orgId!)
+        .order("created_at", { ascending: false })
+        .limit(40);
+      if (error) throw error;
+      return (data ?? []) as ActivityEntry[];
+    },
+  });
+
+/** Human labels for the systems Keystone touches. */
+export const TOOL_LABEL: Record<string, string> = {
+  slack: "Slack",
+  google_mail: "Gmail",
+  google_calendar: "Calendar",
+  google_drive: "Drive",
+  google_sheets: "Sheets",
+  notion: "Notion",
+  microsoft_teams: "Teams",
+  microsoft_outlook: "Outlook",
+  hr: "HR",
+  it: "IT",
+  identity: "Identity",
+  paging: "Paging",
+};
+
+export function toolLabel(system: string): string {
+  return TOOL_LABEL[system] ?? system;
+}
+
+/** Per-hire, per-tool rollup used by the provisioning board. */
+export function toolStates(tasks: Task[]): { tool: string; status: TaskStatus }[] {
+  const byTool = new Map<string, TaskStatus>();
+  const rank: Record<TaskStatus, number> = {
+    failed: 5,
+    needs_human: 4,
+    in_progress: 3,
+    not_started: 2,
+    completed: 1,
+  };
+  for (const t of tasks) {
+    const current = byTool.get(t.system);
+    if (!current || rank[t.status] > rank[current]) byTool.set(t.system, t.status);
+  }
+  return [...byTool.entries()].map(([tool, status]) => ({ tool, status }));
+}

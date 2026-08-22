@@ -20,6 +20,9 @@ export function useRealtimeRefresh() {
         void queryClient.invalidateQueries({ queryKey: ["approvals"] });
         void queryClient.invalidateQueries({ queryKey: ["tasks"] });
       })
+      .on("postgres_changes", { event: "*", schema: "public", table: "activity_log" }, () => {
+        void queryClient.invalidateQueries({ queryKey: ["activity"] });
+      })
       .subscribe();
 
     return () => {
