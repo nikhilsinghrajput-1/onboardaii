@@ -70,8 +70,6 @@ export const saveOrgSettings = createServerFn({ method: "POST" })
       .update({
         slack_approval_channel: data.slackApprovalChannel,
         slack_alert_channel: data.slackAlertChannel,
-        resume_url: data.resumeUrl,
-        flow_trigger_url: data.flowTriggerUrl,
       })
       .eq("id", data.orgId);
     if (error) throw error;
