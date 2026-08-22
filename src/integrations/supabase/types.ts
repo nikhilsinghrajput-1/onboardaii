@@ -14,6 +14,92 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_log: {
+        Row: {
+          action: string
+          created_at: string
+          detail: string | null
+          hire_id: string | null
+          id: string
+          org_id: string
+          outcome: string
+          tool: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          detail?: string | null
+          hire_id?: string | null
+          id?: string
+          org_id: string
+          outcome: string
+          tool: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          detail?: string | null
+          hire_id?: string | null
+          id?: string
+          org_id?: string
+          outcome?: string
+          tool?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "activity_log_hire_id_fkey"
+            columns: ["hire_id"]
+            isOneToOne: false
+            referencedRelation: "hires"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "activity_log_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_briefings: {
+        Row: {
+          briefing_date: string
+          created_at: string
+          id: string
+          model: string | null
+          next_actions: Json
+          org_id: string
+          summary: string
+        }
+        Insert: {
+          briefing_date?: string
+          created_at?: string
+          id?: string
+          model?: string | null
+          next_actions?: Json
+          org_id: string
+          summary: string
+        }
+        Update: {
+          briefing_date?: string
+          created_at?: string
+          id?: string
+          model?: string | null
+          next_actions?: Json
+          org_id?: string
+          summary?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_briefings_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       alert_log: {
         Row: {
           channel: string
@@ -125,69 +211,93 @@ export type Database = {
       }
       hires: {
         Row: {
+          calendar_first_1on1_event_id: string | null
+          calendar_orientation_event_id: string | null
           created_at: string
           department: string
           direct_reports: boolean
+          drive_folder_id: string | null
+          drive_folder_url: string | null
           email: string | null
           employment_type: string | null
           external_id: string | null
           full_name: string
           id: string
           location: string | null
+          notion_page_id: string | null
+          notion_page_url: string | null
           on_call: boolean
           org_id: string
           owning_team: string | null
           pii_access: boolean
           role: string
           seniority: string | null
+          sheets_row_synced_at: string | null
           slack_channel_error: string | null
           slack_channel_id: string | null
           slack_channel_name: string | null
           start_date: string | null
+          teams_notified_at: string | null
           updated_at: string
         }
         Insert: {
+          calendar_first_1on1_event_id?: string | null
+          calendar_orientation_event_id?: string | null
           created_at?: string
           department: string
           direct_reports?: boolean
+          drive_folder_id?: string | null
+          drive_folder_url?: string | null
           email?: string | null
           employment_type?: string | null
           external_id?: string | null
           full_name: string
           id?: string
           location?: string | null
+          notion_page_id?: string | null
+          notion_page_url?: string | null
           on_call?: boolean
           org_id: string
           owning_team?: string | null
           pii_access?: boolean
           role: string
           seniority?: string | null
+          sheets_row_synced_at?: string | null
           slack_channel_error?: string | null
           slack_channel_id?: string | null
           slack_channel_name?: string | null
           start_date?: string | null
+          teams_notified_at?: string | null
           updated_at?: string
         }
         Update: {
+          calendar_first_1on1_event_id?: string | null
+          calendar_orientation_event_id?: string | null
           created_at?: string
           department?: string
           direct_reports?: boolean
+          drive_folder_id?: string | null
+          drive_folder_url?: string | null
           email?: string | null
           employment_type?: string | null
           external_id?: string | null
           full_name?: string
           id?: string
           location?: string | null
+          notion_page_id?: string | null
+          notion_page_url?: string | null
           on_call?: boolean
           org_id?: string
           owning_team?: string | null
           pii_access?: boolean
           role?: string
           seniority?: string | null
+          sheets_row_synced_at?: string | null
           slack_channel_error?: string | null
           slack_channel_id?: string | null
           slack_channel_name?: string | null
           start_date?: string | null
+          teams_notified_at?: string | null
           updated_at?: string
         }
         Relationships: [

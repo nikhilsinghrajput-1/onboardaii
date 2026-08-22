@@ -78,15 +78,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Acropolis Onboarding" },
+      { title: "Keystone · Onboarding operations for Acropolis" },
       {
         name: "description",
-        content: "Live new hire provisioning status, approvals, and failure alerts.",
+        content: "Keystone runs Acropolis onboarding end to end: provisioning across Slack, Gmail, Calendar, Drive, Sheets and Notion, with AI briefings and human approvals.",
       },
-      { property: "og:title", content: "Acropolis Onboarding" },
+      { property: "og:title", content: "Keystone · Onboarding operations for Acropolis" },
       {
         property: "og:description",
-        content: "Live new hire provisioning status, approvals, and failure alerts.",
+        content: "Keystone runs Acropolis onboarding end to end: provisioning across Slack, Gmail, Calendar, Drive, Sheets and Notion, with AI briefings and human approvals.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -120,7 +120,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <head>
         <HeadContent />
       </head>

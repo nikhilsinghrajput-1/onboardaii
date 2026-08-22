@@ -1,8 +1,47 @@
+import { bookOnboardingMeetings } from "./calendar.server";
 import { notifyApprovalNeeded, notifyFailure, type TaskRow } from "./decisions.server";
+import { createOnboardingFolder } from "./drive.server";
+import {
+  logActivity,
+  toolConnected,
+  type HireLite,
+  type ToolStepResult,
+} from "./gateway.server";
 import { sendMailForOrg, welcomeEmail } from "./gmail.server";
+import { createNotionOnboardingPage } from "./notion.server";
 import { loadOrgById, type OrgRow } from "./org-ops.server";
+import { appendHireToTracker } from "./sheets.server";
 import { grantSlackAccess, inviteToWorkspace } from "./slack-access.server";
 import { ensureHireChannel } from "./slack-channels.server";
+import { postTeamsArrivalNote } from "./teams.server";
+
+/** Connector-backed steps beyond Slack and Gmail, keyed by `system:action`. */
+const TOOL_STEPS: Record<
+  string,
+  { connector: string; run: (hire: HireLite, orgName: string) => Promise<ToolStepResult> }
+> = {
+  "google_calendar:book_onboarding_meetings": {
+    connector: "google_calendar",
+    run: (hire) => bookOnboardingMeetings(hire),
+  },
+  "google_drive:create_onboarding_folder": {
+    connector: "google_drive",
+    run: (hire) => createOnboardingFolder(hire),
+  },
+  "google_sheets:append_to_tracker": {
+    connector: "google_sheets",
+    run: (hire) => appendHireToTracker(hire),
+  },
+  "notion:create_onboarding_page": {
+    connector: "notion",
+    run: (hire) => createNotionOnboardingPage(hire),
+  },
+  "microsoft_teams:post_arrival_note": {
+    connector: "microsoft_teams",
+    run: (hire) => postTeamsArrivalNote(hire),
+  },
+};
+
 
 export type RunResult = {
   ok: boolean;
@@ -66,6 +105,41 @@ export function planTasks(hire: HireRecord): PlannedTask[] {
       action: "send_welcome_email",
       reason: "Welcome email with first-day details",
       confidence: 0.98,
+      sensitive: false,
+    },
+    {
+      system: "google_calendar",
+      action: "book_onboarding_meetings",
+      reason: "Day-1 orientation and the first 1:1 with the owning team",
+      confidence: 0.9,
+      sensitive: false,
+    },
+    {
+      system: "google_drive",
+      action: "create_onboarding_folder",
+      reason: `Onboarding folder shared with ${hire.full_name}`,
+      confidence: 0.9,
+      sensitive: false,
+    },
+    {
+      system: "notion",
+      action: "create_onboarding_page",
+      reason: "Onboarding page with the first-week plan",
+      confidence: 0.85,
+      sensitive: false,
+    },
+    {
+      system: "google_sheets",
+      action: "append_to_tracker",
+      reason: "Add the hire to the onboarding tracker sheet",
+      confidence: 0.9,
+      sensitive: false,
+    },
+    {
+      system: "microsoft_teams",
+      action: "post_arrival_note",
+      reason: `Announce ${hire.full_name}'s arrival in Teams`,
+      confidence: 0.8,
       sensitive: false,
     },
     {
@@ -299,11 +373,29 @@ export async function runOnboarding(
         orgName: org.name,
         slackChannel: hire.slack_channel_name,
       });
-      const sent = await sendMailForOrg(orgId, hire.email, mail.subject, mail.html);
+      let sent = await sendMailForOrg(orgId, hire.email, mail.subject, mail.html);
+      let via = "google_mail";
+      // Outlook is the fallback mailer when Gmail is unavailable.
+      if (!sent.ok && toolConnected("microsoft_outlook")) {
+        const { sendOutlookMail } = await import("./outlook.server");
+        const outlook = await sendOutlookMail(hire.email, mail.subject, mail.html);
+        if (outlook.ok) {
+          sent = { ok: true, error: null, raw: outlook.detail ?? "sent via Outlook" };
+          via = "microsoft_outlook";
+        }
+      }
       await upsertTask(hire, planned, {
         status: sent.ok ? "completed" : "failed",
-        error_message: sent.ok ? null : (sent.error ?? "Gmail send failed"),
+        error_message: sent.ok ? null : (sent.error ?? "Welcome email failed"),
         raw_response: sent.raw.slice(0, 4000),
+      });
+      await logActivity({
+        orgId,
+        hireId: hire.id,
+        tool: via,
+        action: "send_welcome_email",
+        outcome: sent.ok ? "ok" : "failed",
+        detail: sent.ok ? `Welcome email sent to ${hire.email}` : sent.raw.slice(0, 400),
       });
       if (sent.ok) result.completed += 1;
       else {
@@ -316,9 +408,59 @@ export async function runOnboarding(
       continue;
     }
 
+    const toolStep = TOOL_STEPS[`${planned.system}:${planned.action}`];
+    if (toolStep) {
+      if (!toolConnected(toolStep.connector)) {
+        await upsertTask(hire, planned, {
+          status: "not_started",
+          error_message: `${toolStep.connector} is not connected — this step was skipped.`,
+        });
+        await logActivity({
+          orgId,
+          hireId: hire.id,
+          tool: toolStep.connector,
+          action: planned.action,
+          outcome: "skipped",
+          detail: "Tool not connected",
+        });
+        continue;
+      }
+      await upsertTask(hire, planned, { status: "in_progress", error_message: null });
+      const step = await toolStep.run(hire, org.name);
+      if (step.patch) {
+        const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+        await supabaseAdmin
+          .from("hires")
+          .update(step.patch as never)
+          .eq("id", hire.id);
+        hire = (await loadHire(orgId, hireId)) ?? hire;
+      }
+      await upsertTask(hire, planned, {
+        status: step.ok ? "completed" : "failed",
+        error_message: step.ok ? null : (step.detail ?? step.error ?? "Step failed"),
+        raw_response: step.detail?.slice(0, 2000) ?? null,
+      });
+      await logActivity({
+        orgId,
+        hireId: hire.id,
+        tool: toolStep.connector,
+        action: planned.action,
+        outcome: step.ok ? "ok" : "failed",
+        detail: step.detail ?? step.error ?? null,
+      });
+      if (step.ok) result.completed += 1;
+      else {
+        result.failed += 1;
+        result.ok = false;
+        if (step.detail) result.errors.push(step.detail.slice(0, 200));
+      }
+      continue;
+    }
+
     // Manual checklist steps: tracked here, ticked off by a human.
     await upsertTask(hire, planned, { status: "not_started", error_message: null });
   }
+
 
   return result;
 }
