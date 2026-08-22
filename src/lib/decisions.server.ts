@@ -1,4 +1,4 @@
-import { loadOrgById, resumeForOrg, slackCallForOrg, type OrgRow } from "./org-ops.server";
+import { loadOrgById, slackCallForOrg, type OrgRow } from "./org-ops.server";
 
 export type Decision = "approved" | "rejected";
 
@@ -74,19 +74,13 @@ export async function applyDecision(input: {
   const org = await loadOrgById(task.org_id);
   if (!org) throw new Error("Organization not found");
 
-  const resume = await resumeForOrg(org, {
-    event: "approval_decision",
-    org_slug: org.slug,
-    task_id: task.id,
-    external_task_id: task.external_task_id,
-    hire_id: task.hire_id,
-    hire_external_id: hire?.external_id ?? null,
-    system: task.system,
-    action: task.action,
-    decision: input.decision,
-    note: input.note,
-    decided_by: input.decidedByLabel,
-  });
+  // Approvals are carried out inside this app now — no external flow to resume.
+  let executed = false;
+  if (input.decision === "approved") {
+    const { executeApprovedTask } = await import("./onboarding-runner.server");
+    await executeApprovedTask(task.id);
+    executed = true;
+  }
 
   if (org.slack_approval_channel) {
     await slackCallForOrg(org.id, "chat.postMessage", {
@@ -97,7 +91,7 @@ export async function applyDecision(input: {
     });
   }
 
-  return { ok: true as const, resumed: resume.ok, resumeDetail: resume.detail };
+  return { ok: true as const, executed };
 }
 
 export async function notifyApprovalNeeded(
