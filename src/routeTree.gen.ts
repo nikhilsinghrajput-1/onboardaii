@@ -16,6 +16,7 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedApprovalsRouteImport } from './routes/_authenticated/approvals'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedIntegrationsRouteImport } from './routes/_authenticated/integrations'
+import { Route as DotlovableOauthConsentRouteImport } from './routes/[.]lovable.oauth.consent'
 import { Route as AuthenticatedHiresHireIdRouteImport } from './routes/_authenticated/hires.$hireId'
 import { Route as OauthConnectorReturnRouteImport } from './routes/oauth/$connector/return'
 import { Route as ApiPublicSlackEventsRouteImport } from './routes/api/public/slack/events'
@@ -55,6 +56,11 @@ const AuthenticatedIntegrationsRoute =
     path: '/integrations',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const DotlovableOauthConsentRoute = DotlovableOauthConsentRouteImport.update({
+  id: '/.lovable/oauth/consent',
+  path: '/.lovable/oauth/consent',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedHiresHireIdRoute =
   AuthenticatedHiresHireIdRouteImport.update({
     id: '/hires/$hireId',
@@ -79,6 +85,7 @@ export interface FileRoutesByFullPath {
   '/approvals': typeof AuthenticatedApprovalsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/integrations': typeof AuthenticatedIntegrationsRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/hires/$hireId': typeof AuthenticatedHiresHireIdRoute
   '/oauth/$connector/return': typeof OauthConnectorReturnRoute
   '/api/public/slack/events': typeof ApiPublicSlackEventsRoute
@@ -90,6 +97,7 @@ export interface FileRoutesByTo {
   '/approvals': typeof AuthenticatedApprovalsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/integrations': typeof AuthenticatedIntegrationsRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/hires/$hireId': typeof AuthenticatedHiresHireIdRoute
   '/oauth/$connector/return': typeof OauthConnectorReturnRoute
   '/api/public/slack/events': typeof ApiPublicSlackEventsRoute
@@ -103,6 +111,7 @@ export interface FileRoutesById {
   '/_authenticated/approvals': typeof AuthenticatedApprovalsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/integrations': typeof AuthenticatedIntegrationsRoute
+  '/.lovable/oauth/consent': typeof DotlovableOauthConsentRoute
   '/_authenticated/hires/$hireId': typeof AuthenticatedHiresHireIdRoute
   '/oauth/$connector/return': typeof OauthConnectorReturnRoute
   '/api/public/slack/events': typeof ApiPublicSlackEventsRoute
@@ -116,6 +125,7 @@ export interface FileRouteTypes {
     | '/approvals'
     | '/dashboard'
     | '/integrations'
+    | '/.lovable/oauth/consent'
     | '/hires/$hireId'
     | '/oauth/$connector/return'
     | '/api/public/slack/events'
@@ -127,6 +137,7 @@ export interface FileRouteTypes {
     | '/approvals'
     | '/dashboard'
     | '/integrations'
+    | '/.lovable/oauth/consent'
     | '/hires/$hireId'
     | '/oauth/$connector/return'
     | '/api/public/slack/events'
@@ -139,6 +150,7 @@ export interface FileRouteTypes {
     | '/_authenticated/approvals'
     | '/_authenticated/dashboard'
     | '/_authenticated/integrations'
+    | '/.lovable/oauth/consent'
     | '/_authenticated/hires/$hireId'
     | '/oauth/$connector/return'
     | '/api/public/slack/events'
@@ -148,6 +160,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  DotlovableOauthConsentRoute: typeof DotlovableOauthConsentRoute
   OauthConnectorReturnRoute: typeof OauthConnectorReturnRoute
   ApiPublicSlackEventsRoute: typeof ApiPublicSlackEventsRoute
 }
@@ -203,6 +216,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIntegrationsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/.lovable/oauth/consent': {
+      id: '/.lovable/oauth/consent'
+      path: '/.lovable/oauth/consent'
+      fullPath: '/.lovable/oauth/consent'
+      preLoaderRoute: typeof DotlovableOauthConsentRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/hires/$hireId': {
       id: '/_authenticated/hires/$hireId'
       path: '/hires/$hireId'
@@ -250,6 +270,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  DotlovableOauthConsentRoute: DotlovableOauthConsentRoute,
   OauthConnectorReturnRoute: OauthConnectorReturnRoute,
   ApiPublicSlackEventsRoute: ApiPublicSlackEventsRoute,
 }
