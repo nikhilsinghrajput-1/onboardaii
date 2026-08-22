@@ -22,6 +22,7 @@ import { Route as OauthConnectorReturnRouteImport } from './routes/oauth/$connec
 import { Route as ApiPublicOnboardingHealthRouteImport } from './routes/api/public/onboarding/health'
 import { Route as ApiPublicOnboardingHireRouteImport } from './routes/api/public/onboarding/hire'
 import { Route as ApiPublicOnboardingHireUpdateRouteImport } from './routes/api/public/onboarding/hire-update'
+import { Route as ApiPublicOnboardingRelayRouteImport } from './routes/api/public/onboarding/relay'
 import { Route as ApiPublicOnboardingTaskRouteImport } from './routes/api/public/onboarding/task'
 import { Route as ApiPublicOnboardingTaskUpdateRouteImport } from './routes/api/public/onboarding/task-update'
 import { Route as ApiPublicSlackEventsRouteImport } from './routes/api/public/slack/events'
@@ -96,6 +97,12 @@ const ApiPublicOnboardingHireUpdateRoute =
     path: '/api/public/onboarding/hire-update',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicOnboardingRelayRoute =
+  ApiPublicOnboardingRelayRouteImport.update({
+    id: '/api/public/onboarding/relay',
+    path: '/api/public/onboarding/relay',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiPublicOnboardingTaskRoute = ApiPublicOnboardingTaskRouteImport.update({
   id: '/api/public/onboarding/task',
   path: '/api/public/onboarding/task',
@@ -138,6 +145,7 @@ export interface FileRoutesByFullPath {
   '/api/public/onboarding/health': typeof ApiPublicOnboardingHealthRoute
   '/api/public/onboarding/hire': typeof ApiPublicOnboardingHireRoute
   '/api/public/onboarding/hire-update': typeof ApiPublicOnboardingHireUpdateRoute
+  '/api/public/onboarding/relay': typeof ApiPublicOnboardingRelayRoute
   '/api/public/onboarding/task': typeof ApiPublicOnboardingTaskRoute
   '/api/public/onboarding/task-update': typeof ApiPublicOnboardingTaskUpdateRoute
   '/api/public/slack/events': typeof ApiPublicSlackEventsRoute
@@ -157,6 +165,7 @@ export interface FileRoutesByTo {
   '/api/public/onboarding/health': typeof ApiPublicOnboardingHealthRoute
   '/api/public/onboarding/hire': typeof ApiPublicOnboardingHireRoute
   '/api/public/onboarding/hire-update': typeof ApiPublicOnboardingHireUpdateRoute
+  '/api/public/onboarding/relay': typeof ApiPublicOnboardingRelayRoute
   '/api/public/onboarding/task': typeof ApiPublicOnboardingTaskRoute
   '/api/public/onboarding/task-update': typeof ApiPublicOnboardingTaskUpdateRoute
   '/api/public/slack/events': typeof ApiPublicSlackEventsRoute
@@ -178,6 +187,7 @@ export interface FileRoutesById {
   '/api/public/onboarding/health': typeof ApiPublicOnboardingHealthRoute
   '/api/public/onboarding/hire': typeof ApiPublicOnboardingHireRoute
   '/api/public/onboarding/hire-update': typeof ApiPublicOnboardingHireUpdateRoute
+  '/api/public/onboarding/relay': typeof ApiPublicOnboardingRelayRoute
   '/api/public/onboarding/task': typeof ApiPublicOnboardingTaskRoute
   '/api/public/onboarding/task-update': typeof ApiPublicOnboardingTaskUpdateRoute
   '/api/public/slack/events': typeof ApiPublicSlackEventsRoute
@@ -199,6 +209,7 @@ export interface FileRouteTypes {
     | '/api/public/onboarding/health'
     | '/api/public/onboarding/hire'
     | '/api/public/onboarding/hire-update'
+    | '/api/public/onboarding/relay'
     | '/api/public/onboarding/task'
     | '/api/public/onboarding/task-update'
     | '/api/public/slack/events'
@@ -218,6 +229,7 @@ export interface FileRouteTypes {
     | '/api/public/onboarding/health'
     | '/api/public/onboarding/hire'
     | '/api/public/onboarding/hire-update'
+    | '/api/public/onboarding/relay'
     | '/api/public/onboarding/task'
     | '/api/public/onboarding/task-update'
     | '/api/public/slack/events'
@@ -238,6 +250,7 @@ export interface FileRouteTypes {
     | '/api/public/onboarding/health'
     | '/api/public/onboarding/hire'
     | '/api/public/onboarding/hire-update'
+    | '/api/public/onboarding/relay'
     | '/api/public/onboarding/task'
     | '/api/public/onboarding/task-update'
     | '/api/public/slack/events'
@@ -253,6 +266,7 @@ export interface RootRouteChildren {
   ApiPublicOnboardingHealthRoute: typeof ApiPublicOnboardingHealthRoute
   ApiPublicOnboardingHireRoute: typeof ApiPublicOnboardingHireRoute
   ApiPublicOnboardingHireUpdateRoute: typeof ApiPublicOnboardingHireUpdateRoute
+  ApiPublicOnboardingRelayRoute: typeof ApiPublicOnboardingRelayRoute
   ApiPublicOnboardingTaskRoute: typeof ApiPublicOnboardingTaskRoute
   ApiPublicOnboardingTaskUpdateRoute: typeof ApiPublicOnboardingTaskUpdateRoute
   ApiPublicSlackEventsRoute: typeof ApiPublicSlackEventsRoute
@@ -353,6 +367,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicOnboardingHireUpdateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/onboarding/relay': {
+      id: '/api/public/onboarding/relay'
+      path: '/api/public/onboarding/relay'
+      fullPath: '/api/public/onboarding/relay'
+      preLoaderRoute: typeof ApiPublicOnboardingRelayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/onboarding/task': {
       id: '/api/public/onboarding/task'
       path: '/api/public/onboarding/task'
@@ -420,6 +441,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiPublicOnboardingHealthRoute: ApiPublicOnboardingHealthRoute,
   ApiPublicOnboardingHireRoute: ApiPublicOnboardingHireRoute,
   ApiPublicOnboardingHireUpdateRoute: ApiPublicOnboardingHireUpdateRoute,
+  ApiPublicOnboardingRelayRoute: ApiPublicOnboardingRelayRoute,
   ApiPublicOnboardingTaskRoute: ApiPublicOnboardingTaskRoute,
   ApiPublicOnboardingTaskUpdateRoute: ApiPublicOnboardingTaskUpdateRoute,
   ApiPublicSlackEventsRoute: ApiPublicSlackEventsRoute,
