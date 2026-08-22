@@ -10,6 +10,7 @@ export type Organization = {
   slack_approval_channel: string | null;
   slack_alert_channel: string | null;
   resume_url: string | null;
+  flow_trigger_url: string | null;
   created_at: string;
 };
 
