@@ -1,4 +1,4 @@
-import { GATEWAY_BASE_URL, getOrgConnectionKey } from "./connections.server";
+import { GATEWAY_BASE_URL, appConnectionKey } from "./connections.server";
 
 export type MailResult = { ok: boolean; error: string | null; raw: string };
 
