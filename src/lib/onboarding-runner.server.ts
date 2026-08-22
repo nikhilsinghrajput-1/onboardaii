@@ -49,6 +49,13 @@ export function planTasks(hire: HireRecord): PlannedTask[] {
     },
     {
       system: "slack",
+      action: "invite_to_workspace",
+      reason: `Invite ${hire.full_name} to the Slack workspace`,
+      confidence: 0.9,
+      sensitive: false,
+    },
+    {
+      system: "slack",
       action: "grant_channel_access",
       reason: `Add ${hire.full_name} to the shared and onboarding channels`,
       confidence: 0.95,
