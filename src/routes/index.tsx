@@ -1,25 +1,21 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
+
+import { LandingPage } from "@/components/landing/LandingPage";
+
+const TITLE = "Keystone · Onboarding operations for Acropolis";
+const DESCRIPTION =
+  "Keystone provisions, tracks and approves every onboarding step across Slack, Gmail, Calendar, Drive, Sheets, Notion and Teams — with AI briefings and human approvals.";
 
 export const Route = createFileRoute("/")({
-  beforeLoad: () => {
-    throw redirect({ to: "/dashboard" });
-  },
   head: () => ({
     meta: [
-      { title: "Acropolis Onboarding · new hire provisioning status" },
-      {
-        name: "description",
-        content:
-          "Live dashboard for new hire provisioning: per-task status, approval queue for sensitive actions, and failure alerts.",
-      },
-      { property: "og:title", content: "Acropolis Onboarding" },
-      {
-        property: "og:description",
-        content: "Live new hire provisioning status, approvals, and failure alerts in one place.",
-      },
+      { title: TITLE },
+      { name: "description", content: DESCRIPTION },
+      { property: "og:title", content: TITLE },
+      { property: "og:description", content: DESCRIPTION },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: () => null,
+  component: LandingPage,
 });
