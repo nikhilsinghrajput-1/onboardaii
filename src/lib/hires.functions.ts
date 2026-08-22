@@ -8,7 +8,7 @@ const channelInput = z.object({
   hireId: z.string().uuid(),
 });
 
-const triggerInput = z.object({
+const runInput = z.object({
   orgId: z.string().uuid(),
   hireId: z.string().uuid(),
   appOrigin: z.string().url().max(500),
@@ -46,8 +46,9 @@ export const grantHireSlackAccess = createServerFn({ method: "POST" })
   });
 
 /**
- * Creates a hire inside the caller's organization and hands the record to the
- * automation flow, which owns all downstream provisioning (Slack included).
+ * Creates a hire and runs the onboarding right here, using Acropolis's own
+ * connected tools: Slack channel + invites, Gmail welcome mail, task checklist,
+ * and approval requests for anything sensitive.
  */
 export const createHire = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -72,30 +73,28 @@ export const createHire = createServerFn({ method: "POST" })
       .single();
     if (error) throw new Error(error.message);
 
-    // Slack provisioning is owned by the automation flow, not this app.
-    // Kick off the organization's automation flow with the finished hire record.
-    const { triggerHireFlow } = await import("./flow-trigger.server");
-    const flow = await triggerHireFlow(data.orgId, hire.id, data.appOrigin).catch(
+    const { runOnboarding } = await import("./onboarding-runner.server");
+    const run = await runOnboarding(data.orgId, hire.id as string, data.appOrigin).catch(
       (err: unknown) => ({
         ok: false,
-        error: err instanceof Error ? err.message : String(err),
+        created: 0,
+        completed: 0,
+        failed: 0,
+        needsApproval: 0,
+        errors: [err instanceof Error ? err.message : String(err)],
       }),
     );
 
-    return {
-      hireId: hire.id as string,
-      flowOk: flow.ok,
-      flowError: flow.ok ? null : (flow.error ?? "Flow trigger failed"),
-    };
+    return { hireId: hire.id as string, run };
   });
 
-/** Re-sends the hire.created webhook to the organization's automation flow. */
-export const retriggerHireFlow = createServerFn({ method: "POST" })
+/** Re-runs the whole onboarding for one hire (idempotent per task). */
+export const runHireOnboarding = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: unknown) => triggerInput.parse(input))
+  .inputValidator((input: unknown) => runInput.parse(input))
   .handler(async ({ data, context }) => {
     const { assertOrgMember } = await import("./connections.server");
-    const { triggerHireFlow } = await import("./flow-trigger.server");
+    const { runOnboarding } = await import("./onboarding-runner.server");
     await assertOrgMember(context.supabase as never, data.orgId, context.userId);
-    return triggerHireFlow(data.orgId, data.hireId, data.appOrigin);
+    return runOnboarding(data.orgId, data.hireId, data.appOrigin);
   });
