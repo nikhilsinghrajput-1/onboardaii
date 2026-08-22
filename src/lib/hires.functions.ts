@@ -84,10 +84,6 @@ export const createHire = createServerFn({ method: "POST" })
 
     return {
       hireId: hire.id as string,
-      channelName: channel?.channelName ?? null,
-      channelError: channel?.error ?? null,
-      channels: access?.channels ?? [],
-      accessError: access?.error ?? null,
       flowOk: flow.ok,
       flowError: flow.ok ? null : (flow.error ?? "Flow trigger failed"),
     };
