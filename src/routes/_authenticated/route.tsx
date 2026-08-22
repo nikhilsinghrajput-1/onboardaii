@@ -1,22 +1,9 @@
-import {
-  createFileRoute,
-  Outlet,
-  redirect,
-  Link,
-  useNavigate,
-  useRouterState,
-} from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { createFileRoute, Outlet, redirect, Link, useNavigate } from "@tanstack/react-router";
+import { type ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { OrgProvider, useOrgContext } from "@/lib/org-context";
 
@@ -32,50 +19,29 @@ export const Route = createFileRoute("/_authenticated")({
   component: Shell,
 });
 
-function OrgSwitcher() {
-  const { orgs, activeOrg, setActiveOrg } = useOrgContext();
-  const navigate = useNavigate();
-  if (!activeOrg) return null;
+/** Internal tool: only people on the member list get in. */
+function MemberGate({ children }: { children: ReactNode }) {
+  const { isLoading, isMember, userEmail } = useOrgContext();
 
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="font-normal">
-          {activeOrg.name}
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
-        {orgs.map((org) => (
-          <DropdownMenuItem
-            key={org.id}
-            onSelect={() => {
-              setActiveOrg(org.id);
-              navigate({ to: "/dashboard" });
-            }}
-          >
-            <span className="truncate">{org.name}</span>
-            {org.id === activeOrg.id && <span className="ml-auto text-xs text-ok">active</span>}
-          </DropdownMenuItem>
-        ))}
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onSelect={() => navigate({ to: "/orgs" })}>
-          Manage organizations
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
+  if (isLoading || isMember === null) {
+    return (
+      <main className="mx-auto max-w-3xl px-6 py-16">
+        <Skeleton className="h-24 w-full" />
+      </main>
+    );
+  }
 
-/** Sends people without an organization to the create/select screen. */
-function OrgGate({ children }: { children: ReactNode }) {
-  const { orgs, isLoading } = useOrgContext();
-  const navigate = useNavigate();
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
-
-  useEffect(() => {
-    if (isLoading || pathname === "/orgs") return;
-    if (orgs.length === 0) navigate({ to: "/orgs", replace: true });
-  }, [isLoading, orgs.length, pathname, navigate]);
+  if (!isMember) {
+    return (
+      <main className="mx-auto max-w-lg px-6 py-24 text-center">
+        <h1 className="text-xl font-semibold tracking-tight">No access yet</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          {userEmail ? <span className="font-mono">{userEmail}</span> : "This account"} is not on the
+          Acropolis member list. Ask an admin to add you, then sign in again.
+        </p>
+      </main>
+    );
+  }
 
   return <>{children}</>;
 }
@@ -90,7 +56,7 @@ function Shell() {
         <header className="sticky top-0 z-20 border-b border-border/70 bg-background/85 backdrop-blur">
           <div className="mx-auto flex max-w-7xl items-center gap-6 px-6 py-4">
             <Link to="/dashboard" className="font-mono text-sm uppercase tracking-[0.2em] text-wait">
-              Onboarding Control
+              Acropolis Onboarding
             </Link>
             <nav className="flex items-center gap-1 text-sm">
               {[
@@ -109,7 +75,6 @@ function Shell() {
               ))}
             </nav>
             <div className="ml-auto flex items-center gap-2">
-              <OrgSwitcher />
               <Button
                 variant="ghost"
                 size="sm"
@@ -125,9 +90,9 @@ function Shell() {
             </div>
           </div>
         </header>
-        <OrgGate>
+        <MemberGate>
           <Outlet />
-        </OrgGate>
+        </MemberGate>
       </div>
     </OrgProvider>
   );
