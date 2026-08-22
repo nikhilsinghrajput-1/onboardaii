@@ -44,10 +44,13 @@ export function NewHireDialog({ orgId }: { orgId: string | undefined }) {
     },
     onSuccess: (result) => {
       toast.success(`${fullName} added`, {
-        description: "Handed off to the automation flow — task updates land on the dashboard.",
+        description: `${result.run.completed} step(s) done, ${result.run.needsApproval} awaiting approval.`,
       });
-      if (result.flowOk) toast.success("Automation flow triggered");
-      else if (result.flowError) toast.error(`Flow not triggered: ${result.flowError}`);
+      if (result.run.failed > 0) {
+        toast.error(`${result.run.failed} step(s) failed`, {
+          description: result.run.errors[0] ?? "Open the hire to see the details.",
+        });
+      }
       setFullName("");
       setRole("");
       setEmail("");
@@ -75,8 +78,9 @@ export function NewHireDialog({ orgId }: { orgId: string | undefined }) {
         <DialogHeader>
           <DialogTitle>Add a new hire</DialogTitle>
           <DialogDescription>
-            Creates the hire record and sends it to the automation flow, which does the
-            provisioning and pushes task updates back here.
+            Creates the hire record and runs onboarding straight away: Slack channel and
+            invites, the welcome email, the task checklist, and approval requests for anything
+            sensitive.
           </DialogDescription>
         </DialogHeader>
         <form
