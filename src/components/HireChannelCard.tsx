@@ -100,5 +100,40 @@ export function HireChannelCard({ hire, orgId }: { hire: Hire; orgId: string | u
         <p className="mt-2 text-sm text-destructive">{hire.slack_channel_error}</p>
       )}
     </section>
+
+    <section className="mt-4 rounded-xl border border-border/70 bg-card p-4">
+      <div className="flex flex-wrap items-center gap-3">
+        <h2 className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
+          Automation flow
+        </h2>
+        {hire.flow_triggered_at ? (
+          <span className="rounded-full border border-ok/40 bg-ok/10 px-3 py-1 text-xs text-ok">
+            Flow triggered {new Date(hire.flow_triggered_at).toLocaleString()}
+          </span>
+        ) : (
+          <span className="rounded-full border border-destructive/40 bg-destructive/10 px-3 py-1 text-xs text-destructive">
+            Flow not triggered
+          </span>
+        )}
+        <div className="ml-auto">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => flow.mutate()}
+            disabled={flow.isPending}
+          >
+            {flow.isPending ? "Triggering…" : "Re-trigger flow"}
+          </Button>
+        </div>
+      </div>
+      <p className="mt-2 text-sm text-muted-foreground">
+        Sends this hire to the flow trigger URL set on the Wiring page, signed with the
+        organization&apos;s signing secret.
+      </p>
+      {hire.flow_trigger_error && (
+        <p className="mt-2 text-sm break-all text-destructive">{hire.flow_trigger_error}</p>
+      )}
+    </section>
+    </>
   );
 }
