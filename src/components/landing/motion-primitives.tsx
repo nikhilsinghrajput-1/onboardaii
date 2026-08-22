@@ -1,7 +1,7 @@
 import * as React from "react";
 import {
   motion,
-  useInView,
+  
   useMotionTemplate,
   useMotionValue,
   useReducedMotion,
@@ -120,36 +120,18 @@ export function RevealItem({
 /* ------------------------------------------------------------------ */
 
 export function Counter({ value, className }: { value: string; className?: string }) {
-  const match = value.match(/^(\D*)(\d+(?:\.\d+)?)(.*)$/);
-  const ref = React.useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-60px" });
-  const reduce = useReducedMotion();
-  const target = match ? Number(match[2]) : 0;
-  const [display, setDisplay] = React.useState(reduce || !match ? target : 0);
-
-  React.useEffect(() => {
-    if (!match || reduce || !inView) return;
-    let frame = 0;
-    const duration = 900;
-    const start = performance.now();
-    const tick = (now: number) => {
-      const t = Math.min(1, (now - start) / duration);
-      const eased = 1 - Math.pow(1 - t, 3);
-      setDisplay(Math.round(target * eased));
-      if (t < 1) frame = requestAnimationFrame(tick);
-    };
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, [inView, match, reduce, target]);
-
-  if (!match) return <span className={className}>{value}</span>;
-
+  // Static by design: these figures are fixed facts, so they fade in once and
+  // never tick or fluctuate.
   return (
-    <span ref={ref} className={className}>
-      {match[1]}
-      {display}
-      {match[3]}
-    </span>
+    <motion.span
+      className={cn("inline-block", className)}
+      initial={{ opacity: 0, y: 6 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-60px" }}
+      transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+    >
+      {value}
+    </motion.span>
   );
 }
 
