@@ -37,6 +37,7 @@ import {
   SpotlightCard,
   TiltCard,
 } from "@/components/landing/motion-primitives";
+import heroBg from "@/assets/hero-bg.mp4.asset.json";
 
 const NAV = [
   { label: "Product", href: "#product" },
