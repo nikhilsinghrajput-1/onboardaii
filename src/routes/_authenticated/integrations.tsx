@@ -7,14 +7,8 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { waitForOAuthCompletion } from "@/lib/appUserConnectorClient";
 import { getIntegrationStatus, saveOrgSettings } from "@/lib/approvals.functions";
-import {
-  completeOrgConnection,
-  disconnectOrgConnection,
-  listOrgConnections,
-  startOrgConnection,
-} from "@/lib/connections.functions";
+import { listOrgConnections } from "@/lib/connections.functions";
 import { CONNECTOR_CATALOG } from "@/lib/connector-catalog";
 import { MembersCard } from "@/components/MembersCard";
 import { useOrgContext } from "@/lib/org-context";
@@ -49,9 +43,6 @@ function IntegrationsPage() {
 
   const fetchStatus = useServerFn(getIntegrationStatus);
   const fetchConnections = useServerFn(listOrgConnections);
-  const startConnect = useServerFn(startOrgConnection);
-  const completeConnect = useServerFn(completeOrgConnection);
-  const removeConnect = useServerFn(disconnectOrgConnection);
   const saveSettings = useServerFn(saveOrgSettings);
 
   const status = useQuery({
@@ -67,7 +58,7 @@ function IntegrationsPage() {
 
   const [approval, setApproval] = useState("");
   const [alert, setAlert] = useState("");
-  const [busyConnector, setBusyConnector] = useState<string | null>(null);
+  
 
   useEffect(() => {
     if (!status.data) return;
@@ -93,58 +84,16 @@ function IntegrationsPage() {
       toast.error(error instanceof Error ? error.message : "Could not save those settings."),
   });
 
-  async function connect(connectorId: string) {
-    if (!orgId) return;
-    setBusyConnector(connectorId);
-    const popup = window.open("", "lovable-oauth", "width=600,height=720");
-    if (!popup) {
-      setBusyConnector(null);
-      toast.error("Allow popups for this site and try again.");
-      return;
-    }
-    try {
-      const { authorizationUrl } = await startConnect({ data: { orgId, connectorId } });
-      const completion = waitForOAuthCompletion(popup, connectorId);
-      popup.location.href = authorizationUrl;
-      const code = await completion;
-      if (code) await completeConnect({ data: { orgId, connectorId, code } });
-      toast.success("Connected.");
-      await queryClient.invalidateQueries({ queryKey: ["org-connections", orgId] });
-      await queryClient.invalidateQueries({ queryKey: ["integration-status", orgId] });
-    } catch (error) {
-      popup.close();
-      toast.error(error instanceof Error ? error.message : "Could not connect that tool.");
-    } finally {
-      setBusyConnector(null);
-    }
-  }
-
-  async function disconnect(connectorId: string) {
-    if (!orgId) return;
-    setBusyConnector(connectorId);
-    try {
-      await removeConnect({ data: { orgId, connectorId } });
-      toast.success("Disconnected.");
-      await queryClient.invalidateQueries({ queryKey: ["org-connections", orgId] });
-      await queryClient.invalidateQueries({ queryKey: ["integration-status", orgId] });
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not disconnect that tool.");
-    } finally {
-      setBusyConnector(null);
-    }
-  }
-
   const origin = typeof window === "undefined" ? "" : window.location.origin;
 
   return (
     <main className="mx-auto max-w-4xl px-6 py-10">
       <h1 className="text-2xl font-semibold tracking-tight">Wiring</h1>
       <p className="mt-1 text-sm text-muted-foreground">
-        Acropolis connects its tools here. This app runs the onboarding itself: it opens the Slack
-        channel, invites the hire, sends the welcome email from your Gmail, builds the checklist, and
-        asks for approval on anything sensitive.
+        Acropolis's tools are connected once for the whole workspace — no per-person sign-in. This
+        app runs the onboarding itself: it opens the Slack channel, invites the hire, sends the
+        welcome email from Gmail, builds the checklist, and asks for approval on anything sensitive.
       </p>
-
 
       <section className="mt-10">
         <h2 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
@@ -153,9 +102,7 @@ function IntegrationsPage() {
         {connections.isLoading && <Skeleton className="mt-3 h-32 w-full" />}
         <ul className="mt-3 grid gap-3 sm:grid-cols-2">
           {CONNECTOR_CATALOG.map((spec) => {
-            const state = connections.data?.find((c) => c.id === spec.id);
-            const connected = Boolean(state?.connected);
-            const available = state?.available ?? true;
+            const connected = Boolean(connections.data?.find((c) => c.id === spec.id)?.connected);
             return (
               <li key={spec.id} className="rounded-xl border border-border/70 bg-card p-5">
                 <div className="flex items-center gap-2">
@@ -163,38 +110,20 @@ function IntegrationsPage() {
                     className={`size-2 rounded-full ${connected ? "bg-ok" : "bg-muted-foreground/40"}`}
                   />
                   <span className="font-medium">{spec.label}</span>
-                  {connected && <span className="ml-auto text-xs text-ok">connected</span>}
+                  <span
+                    className={`ml-auto text-xs ${connected ? "text-ok" : "text-muted-foreground"}`}
+                  >
+                    {connected ? "active" : "not connected"}
+                  </span>
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">{spec.blurb}</p>
-                <div className="mt-4">
-                  {connected ? (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={busyConnector === spec.id}
-                      onClick={() => void disconnect(spec.id)}
-                    >
-                      Disconnect
-                    </Button>
-                  ) : (
-                    <Button
-                      size="sm"
-                      disabled={busyConnector === spec.id || !available}
-                      onClick={() => void connect(spec.id)}
-                    >
-                      {busyConnector === spec.id ? "Connecting…" : "Connect"}
-                    </Button>
-                  )}
-                  {!connected && !available && (
-                    <p className="mt-2 text-xs text-muted-foreground">
-                      Not enabled for this app yet.
-                    </p>
-                  )}
-                </div>
               </li>
             );
           })}
         </ul>
+        <p className="mt-3 text-xs text-muted-foreground">
+          Tools show as active as soon as they are connected for this workspace.
+        </p>
       </section>
 
       <section className="mt-12 rounded-xl border border-border/70 bg-card p-6">

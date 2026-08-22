@@ -1,4 +1,4 @@
-import { GATEWAY_BASE_URL, getOrgConnectionKey } from "./connections.server";
+import { GATEWAY_BASE_URL, appConnectionKey } from "./connections.server";
 
 export type MailResult = { ok: boolean; error: string | null; raw: string };
 
@@ -39,17 +39,12 @@ export async function sendMailForOrg(
     return { ok: false, error: "gateway_key_missing", raw: "LOVABLE_API_KEY is not set" };
   }
 
-  let connectionKey: string | null = null;
-  try {
-    connectionKey = await getOrgConnectionKey(orgId, "google_mail");
-  } catch (error) {
-    console.error("gmail key lookup failed", error);
-  }
+  const connectionKey = appConnectionKey("google_mail");
   if (!connectionKey) {
     return {
       ok: false,
       error: "gmail_not_connected",
-      raw: "Gmail is not connected yet — connect it on the Wiring page.",
+      raw: "Gmail is not connected for this app yet.",
     };
   }
 

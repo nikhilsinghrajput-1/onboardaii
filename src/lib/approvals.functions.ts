@@ -48,8 +48,7 @@ export const getIntegrationStatus = createServerFn({ method: "GET" })
     await store.assertOrgMember(context.supabase as never, data.orgId, context.userId);
     const org = await loadOrgById(data.orgId);
     if (!org) throw new Error("Organization not found");
-    const slackConnected =
-      Boolean(await store.getOrgConnectionKey(org.id, "slack")) || ops.slackConfigured();
+    const slackConnected = Boolean(store.appConnectionKey("slack")) || ops.slackConfigured();
     return {
       slug: org.slug,
       webhookSecret: org.webhook_secret,

@@ -28,6 +28,20 @@ export function clientApiKeyFor(connectorId: string): string | undefined {
   return process.env[`${connectorId.toUpperCase()}_APP_USER_CONNECTOR_CLIENT_API_KEY`];
 }
 
+/**
+ * Key for the app-level (workspace) connection linked to this project, e.g.
+ * SLACK_API_KEY / GOOGLE_MAIL_API_KEY. Single-tenant: Acropolis's own accounts
+ * are connected once in Lovable, so no per-user OAuth is needed.
+ */
+export function appConnectionKey(connectorId: string): string | undefined {
+  const base = connectorId.toUpperCase();
+  for (const name of [`${base}_API_KEY`, `${base}_API_KEY_1`, `${base}_API_KEY_2`]) {
+    const value = process.env[name];
+    if (value) return value;
+  }
+  return undefined;
+}
+
 export async function saveOrgConnection(
   orgId: string,
   connectorId: string,
