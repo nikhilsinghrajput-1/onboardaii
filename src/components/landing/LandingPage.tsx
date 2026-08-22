@@ -373,11 +373,33 @@ export function LandingPage() {
       <main>
         {/* Hero */}
         <section id="product" className="relative overflow-hidden">
+          {/* Animated video backdrop */}
+          {!reduce ? (
+            <video
+              className="pointer-events-none absolute inset-0 size-full object-cover opacity-40"
+              src={heroBg.url}
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="auto"
+              aria-hidden="true"
+            />
+          ) : null}
+          <div
+            className="pointer-events-none absolute inset-0 bg-background/55"
+            aria-hidden="true"
+          />
+          <div
+            className="pointer-events-none absolute inset-0 bg-gradient-to-b from-background/40 via-background/20 to-background"
+            aria-hidden="true"
+          />
           <motion.div
-            className="pointer-events-none absolute inset-0"
+            className="pointer-events-none absolute inset-0 opacity-70"
             style={{ backgroundImage: "var(--gradient-keystone)", y: reduce ? 0 : glowY }}
             aria-hidden="true"
           />
+
           <motion.div
             aria-hidden="true"
             className="pointer-events-none absolute -top-32 left-1/2 size-[520px] -translate-x-1/2 rounded-full blur-3xl"
