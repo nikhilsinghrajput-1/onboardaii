@@ -82,38 +82,37 @@ export async function slackCallForOrg(
     return { ok: false, error: "slack_not_connected", raw: "No Slack connection for this org" };
   }
 
-  // Slack's Web API only accepts JSON bodies for methods with complex payloads
+  // Slack's Web API accepts JSON bodies only for methods with complex payloads
   // (blocks, attachments). Simple string/number args (users.lookupByEmail,
-  // conversations.list/invite) must be form-encoded, otherwise Slack answers
-  // with invalid_arguments.
+  // conversations.list/invite) go through as query params — the gateway does not
+  // forward form-encoded bodies, which Slack then reports as invalid_arguments.
   const isComplex = Object.values(payload).some(
     (value) => value !== null && typeof value === "object",
   );
-  let body: string;
-  let contentType: string;
+
+  let url = `${GATEWAY_BASE_URL}/slack/api/${method}`;
+  const headers: Record<string, string> = {
+    Authorization: `Bearer ${lovableKey}`,
+    "X-Connection-Api-Key": connectionKey,
+  };
+  let body: string | undefined;
+
   if (isComplex) {
+    headers["Content-Type"] = "application/json; charset=utf-8";
     body = JSON.stringify(payload);
-    contentType = "application/json; charset=utf-8";
   } else {
-    const form = new URLSearchParams();
+    const params = new URLSearchParams();
     for (const [key, value] of Object.entries(payload)) {
       if (value === undefined || value === null) continue;
-      form.set(key, String(value));
+      params.set(key, String(value));
     }
-    body = form.toString();
-    contentType = "application/x-www-form-urlencoded; charset=utf-8";
+    const qs = params.toString();
+    if (qs) url += `?${qs}`;
   }
 
   try {
-    const res = await fetch(`${GATEWAY_BASE_URL}/slack/api/${method}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": contentType,
-        Authorization: `Bearer ${lovableKey}`,
-        "X-Connection-Api-Key": connectionKey,
-      },
-      body,
-    });
+    const res = await fetch(url, { method: "POST", headers, body });
+
 
     const raw = await res.text();
     if (!res.ok) {
