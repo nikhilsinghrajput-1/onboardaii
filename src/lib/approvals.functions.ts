@@ -59,6 +59,7 @@ export const getIntegrationStatus = createServerFn({ method: "GET" })
       approvalChannel: org.slack_approval_channel,
       alertChannel: org.slack_alert_channel,
       resumeUrl: org.resume_url,
+      flowTriggerUrl: org.flow_trigger_url,
     };
   });
 
