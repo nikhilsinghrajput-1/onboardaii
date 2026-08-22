@@ -46,8 +46,8 @@ export const grantHireSlackAccess = createServerFn({ method: "POST" })
   });
 
 /**
- * Creates a hire inside the caller's organization, then provisions their
- * dedicated Slack channel and grants access to the shared channels (#general).
+ * Creates a hire inside the caller's organization and hands the record to the
+ * automation flow, which owns all downstream provisioning (Slack included).
  */
 export const createHire = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -72,12 +72,7 @@ export const createHire = createServerFn({ method: "POST" })
       .single();
     if (error) throw new Error(error.message);
 
-    const { ensureHireChannel } = await import("./slack-channels.server");
-    const { grantSlackAccess } = await import("./slack-access.server");
-
-    const channel = await ensureHireChannel(data.orgId, hire.id).catch(() => null);
-    const access = await grantSlackAccess(data.orgId, hire.id).catch(() => null);
-
+    // Slack provisioning is owned by the automation flow, not this app.
     // Kick off the organization's automation flow with the finished hire record.
     const { triggerHireFlow } = await import("./flow-trigger.server");
     const flow = await triggerHireFlow(data.orgId, hire.id, data.appOrigin).catch(
@@ -89,10 +84,6 @@ export const createHire = createServerFn({ method: "POST" })
 
     return {
       hireId: hire.id as string,
-      channelName: channel?.channelName ?? null,
-      channelError: channel?.error ?? null,
-      channels: access?.channels ?? [],
-      accessError: access?.error ?? null,
       flowOk: flow.ok,
       flowError: flow.ok ? null : (flow.error ?? "Flow trigger failed"),
     };

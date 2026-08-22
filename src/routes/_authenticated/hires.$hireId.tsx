@@ -2,7 +2,6 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 
-import { HireChannelCard } from "@/components/HireChannelCard";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -107,7 +106,13 @@ function HireDetail() {
         </div>
       </dl>
 
-      <HireChannelCard hire={hire} orgId={orgId} />
+      <p className="mt-4 font-mono text-xs text-muted-foreground">
+        Flow dispatch:{" "}
+        {hire.flow_triggered_at
+          ? `sent ${new Date(hire.flow_triggered_at).toLocaleString()}`
+          : "not sent yet"}
+        {hire.flow_trigger_error ? ` · ${hire.flow_trigger_error}` : ""}
+      </p>
 
       <div className="mt-8 flex flex-wrap gap-2">
         {FILTERS.map((f) => (
