@@ -31,7 +31,15 @@ export function NewHireDialog({ orgId }: { orgId: string | undefined }) {
     mutationFn: async () => {
       if (!orgId) throw new Error("No active organization");
       return run({
-        data: { orgId, fullName, role, email, department, startDate },
+        data: {
+          orgId,
+          appOrigin: window.location.origin,
+          fullName,
+          role,
+          email,
+          department,
+          startDate,
+        },
       });
     },
     onSuccess: (result) => {
@@ -43,6 +51,8 @@ export function NewHireDialog({ orgId }: { orgId: string | undefined }) {
       if (result.accessError || result.channelError) {
         toast.error(result.accessError ?? result.channelError ?? "");
       }
+      if (result.flowOk) toast.success("Automation flow triggered");
+      else if (result.flowError) toast.error(`Flow not triggered: ${result.flowError}`);
       setFullName("");
       setRole("");
       setEmail("");
