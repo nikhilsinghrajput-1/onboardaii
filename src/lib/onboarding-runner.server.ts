@@ -1,7 +1,7 @@
 import { notifyApprovalNeeded, notifyFailure, type TaskRow } from "./decisions.server";
 import { sendMailForOrg, welcomeEmail } from "./gmail.server";
 import { loadOrgById, type OrgRow } from "./org-ops.server";
-import { grantSlackAccess } from "./slack-access.server";
+import { grantSlackAccess, inviteToWorkspace } from "./slack-access.server";
 import { ensureHireChannel } from "./slack-channels.server";
 
 export type RunResult = {
@@ -209,6 +209,7 @@ export async function runOnboarding(
   let hire = await loadHire(orgId, hireId);
   if (!hire) throw new Error("Hire not found");
 
+  let workspaceMember = false;
   const plan = planTasks(hire);
   result.created = plan.length;
 
