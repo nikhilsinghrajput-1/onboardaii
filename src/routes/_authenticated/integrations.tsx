@@ -241,6 +241,20 @@ function IntegrationsPage() {
               placeholder="https://flow.viasocket.com/hooks/…"
             />
           </label>
+          <label className="text-sm sm:col-span-2">
+            <span className="text-muted-foreground">Flow trigger URL</span>
+            <Input
+              className="mt-1"
+              value={trigger}
+              onChange={(e) => setTrigger(e.target.value)}
+              placeholder="https://flow.viasocket.com/hooks/…"
+            />
+            <span className="mt-1 block text-xs text-muted-foreground">
+              Called whenever someone adds a hire in this app. The body is signed with this
+              organization&apos;s signing secret and sent as{" "}
+              <code className="font-mono">x-onboard-signature</code>.
+            </span>
+          </label>
         </div>
         <Button
           className="mt-4"
