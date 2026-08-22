@@ -84,47 +84,6 @@ function IntegrationsPage() {
       toast.error(error instanceof Error ? error.message : "Could not save those settings."),
   });
 
-  async function connect(connectorId: string) {
-    if (!orgId) return;
-    setBusyConnector(connectorId);
-    const popup = window.open("", "lovable-oauth", "width=600,height=720");
-    if (!popup) {
-      setBusyConnector(null);
-      toast.error("Allow popups for this site and try again.");
-      return;
-    }
-    try {
-      const { authorizationUrl } = await startConnect({ data: { orgId, connectorId } });
-      const completion = waitForOAuthCompletion(popup, connectorId);
-      popup.location.href = authorizationUrl;
-      const code = await completion;
-      if (code) await completeConnect({ data: { orgId, connectorId, code } });
-      toast.success("Connected.");
-      await queryClient.invalidateQueries({ queryKey: ["org-connections", orgId] });
-      await queryClient.invalidateQueries({ queryKey: ["integration-status", orgId] });
-    } catch (error) {
-      popup.close();
-      toast.error(error instanceof Error ? error.message : "Could not connect that tool.");
-    } finally {
-      setBusyConnector(null);
-    }
-  }
-
-  async function disconnect(connectorId: string) {
-    if (!orgId) return;
-    setBusyConnector(connectorId);
-    try {
-      await removeConnect({ data: { orgId, connectorId } });
-      toast.success("Disconnected.");
-      await queryClient.invalidateQueries({ queryKey: ["org-connections", orgId] });
-      await queryClient.invalidateQueries({ queryKey: ["integration-status", orgId] });
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Could not disconnect that tool.");
-    } finally {
-      setBusyConnector(null);
-    }
-  }
-
   const origin = typeof window === "undefined" ? "" : window.location.origin;
 
   return (
