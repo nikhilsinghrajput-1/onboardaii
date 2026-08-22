@@ -16,21 +16,22 @@ import {
   startOrgConnection,
 } from "@/lib/connections.functions";
 import { CONNECTOR_CATALOG } from "@/lib/connector-catalog";
+import { MembersCard } from "@/components/MembersCard";
 import { useOrgContext } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_authenticated/integrations")({
   head: () => ({
     meta: [
-      { title: "Wiring · Onboarding Control" },
+      { title: "Wiring · Acropolis Onboarding" },
       {
         name: "description",
         content:
-          "Connect your organization's own tools, set the approval and alert channels, and copy the signed webhook endpoints your automation posts into.",
+          "Connect Acropolis's tools, set the approval and alert channels, manage who has access, and copy the signed webhook endpoints the automation posts into.",
       },
-      { property: "og:title", content: "Wiring" },
+      { property: "og:title", content: "Wiring · Acropolis Onboarding" },
       {
         property: "og:description",
-        content: "Connect your tools and copy the webhook endpoints for your organization.",
+        content: "Connect tools, manage members, and copy the Acropolis webhook endpoints.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -38,6 +39,7 @@ export const Route = createFileRoute("/_authenticated/integrations")({
   }),
   component: IntegrationsPage,
 });
+
 
 function Endpoint({ path, description, sample }: { path: string; description: string; sample: string }) {
   return (
