@@ -387,6 +387,63 @@ export type Database = {
         }
         Relationships: []
       }
+      relay_deliveries: {
+        Row: {
+          attempts: number
+          callback_host: string
+          callback_url: string
+          created_at: string
+          duration_ms: number | null
+          employee_email: string | null
+          endpoint_type: string
+          error: string | null
+          event: string | null
+          hire_ref: string | null
+          id: string
+          ok: boolean
+          payload_preview: string | null
+          response_preview: string | null
+          source: string
+          status_code: number | null
+        }
+        Insert: {
+          attempts?: number
+          callback_host: string
+          callback_url: string
+          created_at?: string
+          duration_ms?: number | null
+          employee_email?: string | null
+          endpoint_type: string
+          error?: string | null
+          event?: string | null
+          hire_ref?: string | null
+          id?: string
+          ok?: boolean
+          payload_preview?: string | null
+          response_preview?: string | null
+          source?: string
+          status_code?: number | null
+        }
+        Update: {
+          attempts?: number
+          callback_host?: string
+          callback_url?: string
+          created_at?: string
+          duration_ms?: number | null
+          employee_email?: string | null
+          endpoint_type?: string
+          error?: string | null
+          event?: string | null
+          hire_ref?: string | null
+          id?: string
+          ok?: boolean
+          payload_preview?: string | null
+          response_preview?: string | null
+          source?: string
+          status_code?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
