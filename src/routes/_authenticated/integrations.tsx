@@ -58,7 +58,7 @@ function IntegrationsPage() {
 
   const [approval, setApproval] = useState("");
   const [alert, setAlert] = useState("");
-  const [busyConnector, setBusyConnector] = useState<string | null>(null);
+  
 
   useEffect(() => {
     if (!status.data) return;
