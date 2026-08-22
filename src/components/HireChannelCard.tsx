@@ -48,7 +48,24 @@ export function HireChannelCard({ hire, orgId }: { hire: Hire; orgId: string | u
     },
   });
 
+  const runFlow = useServerFn(retriggerHireFlow);
+  const flow = useMutation({
+    mutationFn: async () => {
+      if (!orgId) throw new Error("No active organization");
+      return runFlow({ data: { orgId, hireId: hire.id, appOrigin: window.location.origin } });
+    },
+    onSuccess: (result) => {
+      if (result.ok) toast.success("Automation flow triggered");
+      else toast.error(result.error ?? "Flow could not be triggered");
+      void queryClient.invalidateQueries({ queryKey: ["hires"] });
+    },
+    onError: (error: unknown) => {
+      toast.error(error instanceof Error ? error.message : "Flow could not be triggered");
+    },
+  });
+
   return (
+    <>
     <section className="mt-6 rounded-xl border border-border/70 bg-card p-4">
       <div className="flex flex-wrap items-center gap-3">
         <h2 className="font-mono text-xs uppercase tracking-[0.2em] text-muted-foreground">
