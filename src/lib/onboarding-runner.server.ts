@@ -125,7 +125,7 @@ async function upsertTask(
   hire: HireRecord,
   planned: PlannedTask,
   patch: Partial<{
-    status: string;
+    status: "not_started" | "in_progress" | "completed" | "failed" | "needs_human";
     error_message: string | null;
     raw_response: string | null;
     retry_count: number;
