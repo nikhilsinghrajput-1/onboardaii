@@ -142,7 +142,7 @@ export function NewHireDialog({ orgId }: { orgId: string | undefined }) {
           </div>
           <DialogFooter>
             <Button type="submit" disabled={!ready || mutation.isPending}>
-              {mutation.isPending ? "Provisioning…" : "Create and grant access"}
+              {mutation.isPending ? "Sending…" : "Create hire"}
             </Button>
           </DialogFooter>
         </form>
