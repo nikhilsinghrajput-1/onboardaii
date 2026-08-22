@@ -239,7 +239,32 @@ export async function runOnboarding(
       continue;
     }
 
+    // Workspace membership first — channel access is impossible without it.
+    if (planned.system === "slack" && planned.action === "invite_to_workspace") {
+      await upsertTask(hire, planned, { status: "in_progress", error_message: null });
+      const invited = await inviteToWorkspace(orgId, hireId);
+      if (invited.ok) result.completed += 1;
+      else if (invited.needsHuman) {
+        result.needsApproval += 1;
+        if (invited.error) result.errors.push(invited.error);
+      } else {
+        result.failed += 1;
+        result.ok = false;
+        if (invited.error) result.errors.push(invited.error);
+      }
+      workspaceMember = invited.ok;
+      continue;
+    }
+
     if (planned.system === "slack" && planned.action === "grant_channel_access") {
+      if (!workspaceMember) {
+        await upsertTask(hire, planned, {
+          status: "needs_human",
+          error_message: `${hire.full_name} must join the Slack workspace before channel access can be granted.`,
+        });
+        result.needsApproval += 1;
+        continue;
+      }
       await upsertTask(hire, planned, { status: "in_progress", error_message: null });
       const access = await grantSlackAccess(orgId, hireId);
       if (access.ok) result.completed += 1;
