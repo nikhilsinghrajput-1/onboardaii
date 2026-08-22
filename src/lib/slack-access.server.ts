@@ -69,6 +69,112 @@ async function findChannelIdByName(orgId: string, name: string): Promise<string 
   return null;
 }
 
+export type InviteResult = {
+  ok: boolean;
+  /** Slack user id once the person exists in the workspace. */
+  slackUserId: string | null;
+  /** True when a human still has to send the workspace invite by hand. */
+  needsHuman: boolean;
+  error: string | null;
+};
+
+async function lookupSlackUserId(orgId: string, email: string) {
+  const lookup = await slackCallForOrg(orgId, "users.lookupByEmail", { email });
+  if (!lookup.ok) return { id: null as string | null, error: lookup.error ?? "unknown", raw: lookup.raw };
+  const id = (JSON.parse(lookup.raw) as { user?: { id?: string } }).user?.id ?? null;
+  return { id, error: null as string | null, raw: lookup.raw };
+}
+
+async function teamId(orgId: string): Promise<string | null> {
+  const res = await slackCallForOrg(orgId, "auth.test", {});
+  if (!res.ok) return null;
+  return (JSON.parse(res.raw) as { team_id?: string }).team_id ?? null;
+}
+
+/**
+ * Step 1 of Slack onboarding: make sure the hire is a member of the workspace.
+ * Tries the Slack admin invite API (Enterprise Grid / Business+ with
+ * admin.users:write). When Slack does not allow programmatic invites, the step
+ * is parked as `needs_human` so someone can send the invite from Slack —
+ * channel access is only attempted once the person exists in the workspace.
+ */
+export async function inviteToWorkspace(orgId: string, hireId: string): Promise<InviteResult> {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data: hire, error } = await supabaseAdmin
+    .from("hires")
+    .select("id, full_name, email, slack_channel_id")
+    .eq("org_id", orgId)
+    .eq("id", hireId)
+    .maybeSingle();
+  if (error) throw error;
+  if (!hire) return { ok: false, slackUserId: null, needsHuman: false, error: "Hire not found" };
+
+  const row = hire as { full_name: string; email: string | null; slack_channel_id: string | null };
+  const action = "invite_to_workspace";
+  const reason = `Invite ${row.full_name} to the Acropolis Slack workspace`;
+
+  if (!row.email) {
+    const message = "This hire has no email address, so they cannot be invited to Slack.";
+    await recordTask(orgId, hireId, action, "failed", { reason, error: message });
+    return { ok: false, slackUserId: null, needsHuman: false, error: message };
+  }
+
+  // Already in the workspace? Nothing to do.
+  const existing = await lookupSlackUserId(orgId, row.email);
+  if (existing.id) {
+    await recordTask(orgId, hireId, action, "completed", {
+      reason: `${row.full_name} is a member of the Slack workspace`,
+    });
+    return { ok: true, slackUserId: existing.id, needsHuman: false, error: null };
+  }
+  if (existing.error === "slack_not_connected") {
+    const message = "No Slack workspace is connected yet (Wiring → Slack).";
+    await recordTask(orgId, hireId, action, "failed", { reason, error: message });
+    return { ok: false, slackUserId: null, needsHuman: false, error: message };
+  }
+
+  const team = await teamId(orgId);
+  const invite = await slackCallForOrg(orgId, "admin.users.invite", {
+    email: row.email,
+    real_name: row.full_name,
+    resend: true,
+    ...(team ? { team_id: team } : {}),
+    ...(row.slack_channel_id ? { channel_ids: row.slack_channel_id } : {}),
+  });
+
+  if (invite.ok || invite.error === "already_in_team" || invite.error === "already_invited") {
+    // The person may not have accepted yet, so a user id can still be missing.
+    const after = await lookupSlackUserId(orgId, row.email);
+    await recordTask(orgId, hireId, action, after.id ? "completed" : "needs_human", {
+      reason: after.id
+        ? `${row.full_name} is a member of the Slack workspace`
+        : `${reason} — invitation sent, waiting for them to accept`,
+      error: after.id ? null : "Slack invitation sent; access follows once they accept.",
+      raw: invite.raw.slice(0, 4000),
+    });
+    return {
+      ok: Boolean(after.id),
+      slackUserId: after.id,
+      needsHuman: !after.id,
+      error: after.id ? null : "Slack invitation sent — waiting for the hire to accept.",
+    };
+  }
+
+  const message =
+    invite.error === "missing_scope" || invite.error === "not_allowed_token_type"
+      ? `Slack does not allow this app to invite people automatically. Invite ${row.email} to the workspace from Slack, then re-run onboarding.`
+      : invite.error === "feature_not_enabled" || invite.error === "not_an_enterprise"
+        ? `Automatic workspace invites need a Slack plan that exposes admin invites. Invite ${row.email} manually, then re-run onboarding.`
+        : `Slack could not invite ${row.email} (${invite.error ?? "unknown error"}). Invite them manually, then re-run onboarding.`;
+
+  await recordTask(orgId, hireId, action, "needs_human", {
+    reason,
+    error: message,
+    raw: invite.raw.slice(0, 4000),
+  });
+  return { ok: false, slackUserId: null, needsHuman: true, error: message };
+}
+
 /**
  * Gives one hire access to the organization's shared onboarding channels
  * (currently #general) plus their own onboarding channel, by looking the person
