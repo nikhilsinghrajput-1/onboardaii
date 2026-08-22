@@ -1,7 +1,7 @@
 import { notifyApprovalNeeded, notifyFailure, type TaskRow } from "./decisions.server";
 import { sendMailForOrg, welcomeEmail } from "./gmail.server";
 import { loadOrgById, type OrgRow } from "./org-ops.server";
-import { grantSlackAccess } from "./slack-access.server";
+import { grantSlackAccess, inviteToWorkspace } from "./slack-access.server";
 import { ensureHireChannel } from "./slack-channels.server";
 
 export type RunResult = {
@@ -45,6 +45,13 @@ export function planTasks(hire: HireRecord): PlannedTask[] {
       action: "create_onboarding_channel",
       reason: `Dedicated onboarding channel for ${hire.full_name}`,
       confidence: 0.99,
+      sensitive: false,
+    },
+    {
+      system: "slack",
+      action: "invite_to_workspace",
+      reason: `Invite ${hire.full_name} to the Slack workspace`,
+      confidence: 0.9,
       sensitive: false,
     },
     {
@@ -202,6 +209,7 @@ export async function runOnboarding(
   let hire = await loadHire(orgId, hireId);
   if (!hire) throw new Error("Hire not found");
 
+  let workspaceMember = false;
   const plan = planTasks(hire);
   result.created = plan.length;
 
@@ -232,7 +240,32 @@ export async function runOnboarding(
       continue;
     }
 
+    // Workspace membership first — channel access is impossible without it.
+    if (planned.system === "slack" && planned.action === "invite_to_workspace") {
+      await upsertTask(hire, planned, { status: "in_progress", error_message: null });
+      const invited = await inviteToWorkspace(orgId, hireId);
+      if (invited.ok) result.completed += 1;
+      else if (invited.needsHuman) {
+        result.needsApproval += 1;
+        if (invited.error) result.errors.push(invited.error);
+      } else {
+        result.failed += 1;
+        result.ok = false;
+        if (invited.error) result.errors.push(invited.error);
+      }
+      workspaceMember = invited.ok;
+      continue;
+    }
+
     if (planned.system === "slack" && planned.action === "grant_channel_access") {
+      if (!workspaceMember) {
+        await upsertTask(hire, planned, {
+          status: "needs_human",
+          error_message: `${hire.full_name} must join the Slack workspace before channel access can be granted.`,
+        });
+        result.needsApproval += 1;
+        continue;
+      }
       await upsertTask(hire, planned, { status: "in_progress", error_message: null });
       const access = await grantSlackAccess(orgId, hireId);
       if (access.ok) result.completed += 1;
