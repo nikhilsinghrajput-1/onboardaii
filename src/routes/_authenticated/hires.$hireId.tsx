@@ -106,13 +106,20 @@ function HireDetail() {
         </div>
       </dl>
 
-      <p className="mt-4 font-mono text-xs text-muted-foreground">
-        Flow dispatch:{" "}
-        {hire.flow_triggered_at
-          ? `sent ${new Date(hire.flow_triggered_at).toLocaleString()}`
-          : "not sent yet"}
-        {hire.flow_trigger_error ? ` · ${hire.flow_trigger_error}` : ""}
-      </p>
+      <div className="mt-4 flex flex-wrap items-center gap-3">
+        <Button
+          size="sm"
+          disabled={!orgId || rerun.isPending}
+          onClick={() => rerun.mutate()}
+        >
+          {rerun.isPending ? "Running…" : "Re-run onboarding"}
+        </Button>
+        <span className="font-mono text-xs text-muted-foreground">
+          {hire.slack_channel_name
+            ? `Slack: #${hire.slack_channel_name}`
+            : (hire.slack_channel_error ?? "Slack channel: none yet")}
+        </span>
+      </div>
 
       <div className="mt-8 flex flex-wrap gap-2">
         {FILTERS.map((f) => (
