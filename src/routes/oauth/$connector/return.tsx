@@ -5,7 +5,7 @@ export const Route = createFileRoute("/oauth/$connector/return")({
   ssr: false,
   head: () => ({
     meta: [
-      { title: "Finishing connection · Onboarding Control" },
+      { title: "Finishing connection · Acropolis Onboarding" },
       { name: "robots", content: "noindex" },
     ],
   }),

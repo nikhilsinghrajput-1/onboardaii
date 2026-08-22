@@ -6,13 +6,13 @@ export const Route = createFileRoute("/")({
   },
   head: () => ({
     meta: [
-      { title: "Onboarding Control · new hire provisioning status" },
+      { title: "Acropolis Onboarding · new hire provisioning status" },
       {
         name: "description",
         content:
           "Live dashboard for new hire provisioning: per-task status, approval queue for sensitive actions, and failure alerts.",
       },
-      { property: "og:title", content: "Onboarding Control" },
+      { property: "og:title", content: "Acropolis Onboarding" },
       {
         property: "og:description",
         content: "Live new hire provisioning status, approvals, and failure alerts in one place.",

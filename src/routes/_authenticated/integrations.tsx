@@ -105,7 +105,7 @@ function IntegrationsPage() {
     onSuccess: () => {
       toast.success("Saved.");
       void queryClient.invalidateQueries({ queryKey: ["integration-status", orgId] });
-      void queryClient.invalidateQueries({ queryKey: ["organizations"] });
+      void queryClient.invalidateQueries({ queryKey: ["organization"] });
     },
     onError: (error) =>
       toast.error(error instanceof Error ? error.message : "Could not save those settings."),

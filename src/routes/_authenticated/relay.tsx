@@ -17,7 +17,7 @@ import {
 export const Route = createFileRoute("/_authenticated/relay")({
   head: () => ({
     meta: [
-      { title: "Callback Relay · Onboarding Control" },
+      { title: "Callback Relay · Acropolis Onboarding" },
       {
         name: "description",
         content:

@@ -15,7 +15,7 @@ import { useOrgContext } from "@/lib/org-context";
 export const Route = createFileRoute("/_authenticated/approvals")({
   head: () => ({
     meta: [
-      { title: "Approval queue · Onboarding Control" },
+      { title: "Approval queue · Acropolis Onboarding" },
       {
         name: "description",
         content:
