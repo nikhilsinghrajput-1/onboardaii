@@ -95,7 +95,7 @@ export async function slackCallForOrg(
     Authorization: `Bearer ${lovableKey}`,
     "X-Connection-Api-Key": connectionKey,
   };
-  let body: string | undefined;
+  let body: string | null = null;
 
   if (isComplex) {
     headers["Content-Type"] = "application/json; charset=utf-8";
