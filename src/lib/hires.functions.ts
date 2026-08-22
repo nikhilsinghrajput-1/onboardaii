@@ -46,8 +46,8 @@ export const grantHireSlackAccess = createServerFn({ method: "POST" })
   });
 
 /**
- * Creates a hire inside the caller's organization, then provisions their
- * dedicated Slack channel and grants access to the shared channels (#general).
+ * Creates a hire inside the caller's organization and hands the record to the
+ * automation flow, which owns all downstream provisioning (Slack included).
  */
 export const createHire = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
