@@ -131,6 +131,8 @@ export type Database = {
           email: string | null
           employment_type: string | null
           external_id: string | null
+          flow_trigger_error: string | null
+          flow_triggered_at: string | null
           full_name: string
           id: string
           location: string | null
@@ -153,6 +155,8 @@ export type Database = {
           email?: string | null
           employment_type?: string | null
           external_id?: string | null
+          flow_trigger_error?: string | null
+          flow_triggered_at?: string | null
           full_name: string
           id?: string
           location?: string | null
@@ -175,6 +179,8 @@ export type Database = {
           email?: string | null
           employment_type?: string | null
           external_id?: string | null
+          flow_trigger_error?: string | null
+          flow_triggered_at?: string | null
           full_name?: string
           id?: string
           location?: string | null
@@ -343,6 +349,7 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string
+          flow_trigger_url: string | null
           id: string
           name: string
           resume_url: string | null
@@ -355,6 +362,7 @@ export type Database = {
         Insert: {
           created_at?: string
           created_by: string
+          flow_trigger_url?: string | null
           id?: string
           name: string
           resume_url?: string | null
@@ -367,6 +375,7 @@ export type Database = {
         Update: {
           created_at?: string
           created_by?: string
+          flow_trigger_url?: string | null
           id?: string
           name?: string
           resume_url?: string | null
@@ -388,6 +397,7 @@ export type Database = {
         Returns: {
           created_at: string
           created_by: string
+          flow_trigger_url: string | null
           id: string
           name: string
           resume_url: string | null

@@ -77,6 +77,7 @@ function IntegrationsPage() {
   const [approval, setApproval] = useState("");
   const [alert, setAlert] = useState("");
   const [resume, setResume] = useState("");
+  const [trigger, setTrigger] = useState("");
   const [busyConnector, setBusyConnector] = useState<string | null>(null);
 
   useEffect(() => {
@@ -84,6 +85,7 @@ function IntegrationsPage() {
     setApproval(status.data.approvalChannel ?? "");
     setAlert(status.data.alertChannel ?? "");
     setResume(status.data.resumeUrl ?? "");
+    setTrigger(status.data.flowTriggerUrl ?? "");
   }, [status.data]);
 
   const settingsMutation = useMutation({
@@ -94,6 +96,7 @@ function IntegrationsPage() {
           slackApprovalChannel: approval.trim() || null,
           slackAlertChannel: alert.trim() || null,
           resumeUrl: resume.trim() || null,
+          flowTriggerUrl: trigger.trim() || null,
         },
       }),
     onSuccess: () => {
@@ -240,6 +243,20 @@ function IntegrationsPage() {
               onChange={(e) => setResume(e.target.value)}
               placeholder="https://flow.viasocket.com/hooks/…"
             />
+          </label>
+          <label className="text-sm sm:col-span-2">
+            <span className="text-muted-foreground">Flow trigger URL</span>
+            <Input
+              className="mt-1"
+              value={trigger}
+              onChange={(e) => setTrigger(e.target.value)}
+              placeholder="https://flow.viasocket.com/hooks/…"
+            />
+            <span className="mt-1 block text-xs text-muted-foreground">
+              Called whenever someone adds a hire in this app. The body is signed with this
+              organization&apos;s signing secret and sent as{" "}
+              <code className="font-mono">x-onboard-signature</code>.
+            </span>
           </label>
         </div>
         <Button

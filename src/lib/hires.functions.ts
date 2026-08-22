@@ -8,8 +8,15 @@ const channelInput = z.object({
   hireId: z.string().uuid(),
 });
 
+const triggerInput = z.object({
+  orgId: z.string().uuid(),
+  hireId: z.string().uuid(),
+  appOrigin: z.string().url().max(500),
+});
+
 const newHireInput = z.object({
   orgId: z.string().uuid(),
+  appOrigin: z.string().url().max(500),
   fullName: z.string().trim().min(1).max(200),
   role: z.string().trim().min(1).max(200),
   email: z.string().trim().email().max(320),
@@ -71,11 +78,33 @@ export const createHire = createServerFn({ method: "POST" })
     const channel = await ensureHireChannel(data.orgId, hire.id).catch(() => null);
     const access = await grantSlackAccess(data.orgId, hire.id).catch(() => null);
 
+    // Kick off the organization's automation flow with the finished hire record.
+    const { triggerHireFlow } = await import("./flow-trigger.server");
+    const flow = await triggerHireFlow(data.orgId, hire.id, data.appOrigin).catch(
+      (err: unknown) => ({
+        ok: false,
+        error: err instanceof Error ? err.message : String(err),
+      }),
+    );
+
     return {
       hireId: hire.id as string,
       channelName: channel?.channelName ?? null,
       channelError: channel?.error ?? null,
       channels: access?.channels ?? [],
       accessError: access?.error ?? null,
+      flowOk: flow.ok,
+      flowError: flow.ok ? null : (flow.error ?? "Flow trigger failed"),
     };
+  });
+
+/** Re-sends the hire.created webhook to the organization's automation flow. */
+export const retriggerHireFlow = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: unknown) => triggerInput.parse(input))
+  .handler(async ({ data, context }) => {
+    const { assertOrgMember } = await import("./connections.server");
+    const { triggerHireFlow } = await import("./flow-trigger.server");
+    await assertOrgMember(context.supabase as never, data.orgId, context.userId);
+    return triggerHireFlow(data.orgId, data.hireId, data.appOrigin);
   });
