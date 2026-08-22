@@ -97,19 +97,8 @@ export async function handleHireWebhook(request: Request): Promise<Response> {
     return Response.json({ error: "could not store hire" }, { status: 500 });
   }
 
-  // Give every new hire a dedicated Slack channel in the workspace's own Slack.
-  const { ensureHireChannel } = await import("./slack-channels.server");
-  const channel = await ensureHireChannel(org.id, data.id).catch((err: unknown) => {
-    console.error("hire channel provisioning threw", err);
-    return null;
-  });
-
-  return Response.json({
-    ok: true,
-    hire_id: data.id,
-    slack_channel: channel?.channelName ?? null,
-    slack_channel_error: channel?.error ?? null,
-  });
+  // Provisioning (Slack channels included) is owned by the automation flow.
+  return Response.json({ ok: true, hire_id: data.id });
 }
 
 export async function handleTaskWebhook(request: Request): Promise<Response> {
