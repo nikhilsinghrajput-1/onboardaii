@@ -158,25 +158,14 @@ const BRIEFINGS = [
 
 type Tone = "ok" | "run" | "wait" | "fail";
 
-const HERO_ROWS: { name: string; note: string; tone: Tone }[][] = [
-  [
-    { name: "Slack · workspace invite", tone: "ok", note: "done" },
-    { name: "Gmail · welcome email", tone: "ok", note: "done" },
-    { name: "Calendar · Day-1 orientation", tone: "run", note: "running" },
-    { name: "Drive · onboarding folder", tone: "wait", note: "approval" },
-  ],
-  [
-    { name: "Gmail · welcome email", tone: "ok", note: "done" },
-    { name: "Calendar · Day-1 orientation", tone: "ok", note: "done" },
-    { name: "Drive · onboarding folder", tone: "run", note: "running" },
-    { name: "Notion · role handbook", tone: "wait", note: "queued" },
-  ],
-  [
-    { name: "Calendar · Day-1 orientation", tone: "ok", note: "done" },
-    { name: "Drive · onboarding folder", tone: "ok", note: "done" },
-    { name: "Notion · role handbook", tone: "run", note: "running" },
-    { name: "Sheets · headcount tracker", tone: "wait", note: "queued" },
-  ],
+/** One stable checklist. The runner walks down it slowly — rows never swap. */
+const HERO_TASKS: { name: string; gated?: boolean }[] = [
+  { name: "Slack · workspace invite" },
+  { name: "Gmail · welcome email" },
+  { name: "Calendar · Day-1 orientation" },
+  { name: "Drive · onboarding folder", gated: true },
+  { name: "Notion · role handbook" },
+  { name: "Sheets · headcount tracker" },
 ];
 
 function Dot({ tone, pulse = false }: { tone: Tone; pulse?: boolean }) {
@@ -188,7 +177,7 @@ function Dot({ tone, pulse = false }: { tone: Tone; pulse?: boolean }) {
         <motion.span
           className={`absolute inset-0 rounded-full ${cls}`}
           animate={{ scale: [1, 2.4, 1], opacity: [0.5, 0, 0.5] }}
-          transition={{ duration: 1.8, repeat: Infinity, ease: "easeOut" }}
+          transition={{ duration: 2.4, repeat: Infinity, ease: "easeOut" }}
         />
       ) : null}
       <span className={`relative inline-block size-2 rounded-full ${cls}`} />
@@ -208,9 +197,11 @@ function useCycle(length: number, ms: number) {
 }
 
 function HeroPanel() {
-  const step = useCycle(HERO_ROWS.length, 3200);
-  const brief = useCycle(BRIEFINGS.length, 5200);
-  const rows = HERO_ROWS[step] ?? HERO_ROWS[0]!;
+  // Advances one step every 4.5s, then rests on "complete" before looping.
+  const stage = useCycle(HERO_TASKS.length + 1, 4500);
+  const brief = useCycle(BRIEFINGS.length, 9000);
+  const done = Math.min(stage, HERO_TASKS.length);
+  const pct = Math.round((done / HERO_TASKS.length) * 100);
 
   return (
     <TiltCard>
@@ -218,13 +209,13 @@ function HeroPanel() {
         <motion.span
           aria-hidden="true"
           className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary to-transparent"
-          animate={{ opacity: [0.2, 1, 0.2] }}
-          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          animate={{ opacity: [0.25, 0.9, 0.25] }}
+          transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
         />
         <CardContent className="space-y-5 p-5">
           <div className="flex items-center justify-between">
             <span className="font-mono text-[11px] uppercase tracking-[0.24em] text-primary">
-              Control room
+              Control room · demo
             </span>
             <span className="flex items-center gap-2 font-mono text-[11px] text-muted-foreground">
               <Dot tone="ok" pulse />
@@ -232,45 +223,55 @@ function HeroPanel() {
             </span>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-            {STATS.map((s) => (
+          <div className="rounded-md border border-border/60 bg-background/40 p-3">
+            <div className="flex items-baseline justify-between">
+              <span className="text-sm font-medium text-foreground">Nikhil S · Backend Engineer</span>
+              <span className="font-mono text-sm tabular-nums text-primary">
+                {done}/{HERO_TASKS.length}
+              </span>
+            </div>
+            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-border/60">
               <motion.div
-                key={s.label}
-                whileHover={{ y: -3, borderColor: "color-mix(in oklab, var(--primary) 50%, transparent)" }}
-                transition={{ type: "spring", stiffness: 300, damping: 20 }}
-                className="rounded-md border border-border/60 bg-background/40 p-3"
-              >
-                <Counter value={s.value} className="font-mono text-xl tabular-nums text-foreground" />
-                <p className="mt-1 text-[11px] leading-tight text-muted-foreground">{s.label}</p>
-              </motion.div>
-            ))}
+                className="h-full rounded-full bg-primary"
+                animate={{ width: `${pct}%` }}
+                transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+              />
+            </div>
+            <p className="mt-2 font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+              {done === HERO_TASKS.length ? "fully ready" : "provisioning"}
+            </p>
           </div>
 
           <div className="space-y-2">
-            {rows.map((row, i) => (
-              <motion.div
-                key={`${step}-${row.name}`}
-                initial={{ opacity: 0, x: -12 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.4, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] }}
-                className="flex items-center justify-between gap-3 rounded-md border border-border/50 px-3 py-2"
-              >
-                <span className="flex items-center gap-2 text-sm text-foreground">
-                  <Dot tone={row.tone} pulse={row.tone === "run"} />
-                  {row.name}
-                </span>
-                <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
-                  {row.note}
-                </span>
-              </motion.div>
-            ))}
+            {HERO_TASKS.map((task, i) => {
+              const isDone = i < stage;
+              const isRunning = i === stage;
+              const gatedNow = isRunning && task.gated;
+              const tone: Tone = isDone ? "ok" : gatedNow ? "wait" : isRunning ? "run" : "wait";
+              const note = isDone ? "done" : gatedNow ? "approval" : isRunning ? "running" : "queued";
+              return (
+                <div
+                  key={task.name}
+                  className="flex items-center justify-between gap-3 rounded-md border border-border/50 px-3 py-2 transition-colors"
+                  style={{ opacity: isDone || isRunning ? 1 : 0.55 }}
+                >
+                  <span className="flex items-center gap-2 text-sm text-foreground">
+                    <Dot tone={tone} pulse={isRunning} />
+                    {task.name}
+                  </span>
+                  <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground">
+                    {note}
+                  </span>
+                </div>
+              );
+            })}
           </div>
 
           <div className="relative min-h-[104px] overflow-hidden rounded-md border border-primary/25 bg-primary/5 p-3">
             <p className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.2em] text-primary">
               <motion.span
                 animate={{ rotate: [0, 12, -12, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
                 className="inline-flex"
               >
                 <Sparkles className="size-3.5" aria-hidden="true" />
@@ -283,7 +284,7 @@ function HeroPanel() {
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.35 }}
+                transition={{ duration: 0.5 }}
                 className="mt-1.5 text-sm leading-relaxed text-muted-foreground"
               >
                 {BRIEFINGS[brief]}
