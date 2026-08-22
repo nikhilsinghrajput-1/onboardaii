@@ -95,6 +95,10 @@ export async function ensureHireChannel(
 
   const row = hire as HireRow;
   if (row.slack_channel_id) {
+    // Channel already exists — close the task so a re-run never leaves it "in progress".
+    await recordTask(orgId, hireId, "completed", {
+      reason: `Dedicated Slack channel #${row.slack_channel_name ?? "onboarding"} already exists`,
+    });
     return {
       ok: true,
       channelId: row.slack_channel_id,
@@ -102,6 +106,7 @@ export async function ensureHireChannel(
       error: null,
     };
   }
+
 
   const name = channelNameForHire(row.full_name, row.external_id);
   const created = await slackCallForOrg(orgId, "conversations.create", {
