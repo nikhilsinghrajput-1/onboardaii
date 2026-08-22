@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
@@ -14,6 +16,7 @@ import {
   tasksQuery,
   type TaskStatus,
 } from "@/lib/dashboard-data";
+import { runHireOnboarding } from "@/lib/hires.functions";
 import { useOrgContext } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_authenticated/hires/$hireId")({
@@ -56,6 +59,24 @@ function HireDetail() {
   const approvals = useQuery(approvalsQuery(orgId));
   const [filter, setFilter] = useState<TaskStatus | "all">("all");
   const [open, setOpen] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const runOnboarding = useServerFn(runHireOnboarding);
+
+  const rerun = useMutation({
+    mutationFn: () =>
+      runOnboarding({
+        data: { orgId: orgId!, hireId, appOrigin: window.location.origin },
+      }),
+    onSuccess: (result) => {
+      toast.success("Onboarding run finished", {
+        description: `${result.completed} done · ${result.needsApproval} awaiting approval · ${result.failed} failed`,
+      });
+      void queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      void queryClient.invalidateQueries({ queryKey: ["hires"] });
+    },
+    onError: (error) =>
+      toast.error(error instanceof Error ? error.message : "Could not run onboarding."),
+  });
 
   const hire = hires.data?.find((h) => h.id === hireId);
   const hireTasks = (tasks.data ?? []).filter((t) => t.hire_id === hireId);
