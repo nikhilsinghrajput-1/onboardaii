@@ -57,7 +57,7 @@ export function Reveal({
     <Comp
       className={className}
       initial={reduce ? false : "hidden"}
-      whileInView={reduce ? false : "show"}
+      whileInView="show"
       viewport={{ once: true, margin: "-80px" }}
       variants={revealVariants}
       transition={{ duration: 0.55, delay, ease: [0.22, 1, 0.36, 1] }}
@@ -85,7 +85,7 @@ export function RevealGroup({
     <Comp
       className={className}
       initial={reduce ? false : "hidden"}
-      whileInView={reduce ? false : "show"}
+      whileInView="show"
       viewport={{ once: true, margin: "-60px" }}
       variants={{ hidden: {}, show: { transition: { staggerChildren: stagger } } }}
     >
