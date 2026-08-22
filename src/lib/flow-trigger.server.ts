@@ -88,7 +88,7 @@ export async function triggerHireFlow(
       headers: {
         "Content-Type": "application/json",
         "x-onboard-signature": `sha256=${signature}`,
-        "x-onboard-event": "hire.created",
+        "x-onboard-event": "employee.onboarding",
       },
       body,
     });
