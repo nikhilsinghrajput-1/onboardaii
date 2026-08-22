@@ -309,7 +309,7 @@ function IntegrationsPage() {
 }`}
         />
         <Endpoint
-          path={`${origin}/api/public/viasocket/${slug}/task`}
+          path={`${origin}/api/public/onboarding/task`}
           description="Called after every action step. A first-time needs_human posts an approval request; a first-time failed fires the alert with the raw response attached."
           sample={`{
   "hire_external_id": "WD-10044",
