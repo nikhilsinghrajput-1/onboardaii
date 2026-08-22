@@ -56,8 +56,8 @@ export function Reveal({
   return (
     <Comp
       className={className}
-      initial={reduce ? undefined : "hidden"}
-      whileInView={reduce ? undefined : "show"}
+      initial={reduce ? false : "hidden"}
+      whileInView={reduce ? false : "show"}
       viewport={{ once: true, margin: "-80px" }}
       variants={revealVariants}
       transition={{ duration: 0.55, delay, ease: [0.22, 1, 0.36, 1] }}
@@ -84,8 +84,8 @@ export function RevealGroup({
   return (
     <Comp
       className={className}
-      initial={reduce ? undefined : "hidden"}
-      whileInView={reduce ? undefined : "show"}
+      initial={reduce ? false : "hidden"}
+      whileInView={reduce ? false : "show"}
       viewport={{ once: true, margin: "-60px" }}
       variants={{ hidden: {}, show: { transition: { staggerChildren: stagger } } }}
     >
@@ -211,7 +211,7 @@ export function TiltCard({
   return (
     <motion.div
       className={className}
-      style={reduce ? undefined : { rotateX, rotateY, transformPerspective: 1200 }}
+      style={reduce ? {} : { rotateX, rotateY, transformPerspective: 1200 }}
       onPointerMove={(e) => {
         if (reduce) return;
         const r = e.currentTarget.getBoundingClientRect();
@@ -240,7 +240,7 @@ export function Magnetic({ children }: { children: React.ReactNode }) {
   return (
     <motion.span
       className="inline-flex"
-      style={reduce ? undefined : { x, y }}
+      style={reduce ? {} : { x, y }}
       onPointerMove={(e) => {
         if (reduce) return;
         const r = e.currentTarget.getBoundingClientRect();

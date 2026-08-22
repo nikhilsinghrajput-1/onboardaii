@@ -210,7 +210,7 @@ function useCycle(length: number, ms: number) {
 function HeroPanel() {
   const step = useCycle(HERO_ROWS.length, 3200);
   const brief = useCycle(BRIEFINGS.length, 5200);
-  const rows = HERO_ROWS[step];
+  const rows = HERO_ROWS[step] ?? HERO_ROWS[0]!;
 
   return (
     <TiltCard>
@@ -404,8 +404,8 @@ export function LandingPage() {
                   <motion.span
                     key={word}
                     className="inline-block"
-                    initial={reduce ? undefined : { opacity: 0, y: 24, filter: "blur(8px)" }}
-                    animate={reduce ? undefined : { opacity: 1, y: 0, filter: "blur(0px)" }}
+                    initial={reduce ? false : { opacity: 0, y: 24, filter: "blur(8px)" }}
+                    animate={reduce ? false : { opacity: 1, y: 0, filter: "blur(0px)" }}
                     transition={{ duration: 0.6, delay: 0.1 + i * 0.1, ease: [0.22, 1, 0.36, 1] }}
                   >
                     {word}
@@ -416,8 +416,8 @@ export function LandingPage() {
 
               <motion.p
                 className="mt-5 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg"
-                initial={reduce ? undefined : { opacity: 0, y: 12 }}
-                animate={reduce ? undefined : { opacity: 1, y: 0 }}
+                initial={reduce ? false : { opacity: 0, y: 12 }}
+                animate={reduce ? false : { opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.5 }}
               >
                 Keystone provisions, tracks, approves and reports every onboarding step across Slack,
@@ -427,8 +427,8 @@ export function LandingPage() {
 
               <motion.div
                 className="mt-8 flex flex-wrap items-center gap-3"
-                initial={reduce ? undefined : { opacity: 0, y: 12 }}
-                animate={reduce ? undefined : { opacity: 1, y: 0 }}
+                initial={reduce ? false : { opacity: 0, y: 12 }}
+                animate={reduce ? false : { opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.6 }}
               >
                 <Magnetic>
@@ -455,8 +455,8 @@ export function LandingPage() {
             </div>
 
             <motion.div
-              initial={reduce ? undefined : { opacity: 0, y: 28, scale: 0.97 }}
-              animate={reduce ? undefined : { opacity: 1, y: 0, scale: 1 }}
+              initial={reduce ? false : { opacity: 0, y: 28, scale: 0.97 }}
+              animate={reduce ? false : { opacity: 1, y: 0, scale: 1 }}
               transition={{ duration: 0.8, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
             >
               <HeroPanel />
