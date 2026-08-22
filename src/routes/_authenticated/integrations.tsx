@@ -7,14 +7,8 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { waitForOAuthCompletion } from "@/lib/appUserConnectorClient";
 import { getIntegrationStatus, saveOrgSettings } from "@/lib/approvals.functions";
-import {
-  completeOrgConnection,
-  disconnectOrgConnection,
-  listOrgConnections,
-  startOrgConnection,
-} from "@/lib/connections.functions";
+import { listOrgConnections } from "@/lib/connections.functions";
 import { CONNECTOR_CATALOG } from "@/lib/connector-catalog";
 import { MembersCard } from "@/components/MembersCard";
 import { useOrgContext } from "@/lib/org-context";
