@@ -1,0 +1,144 @@
+{
+  "version": 1,
+  "sdk_version": "0.26.3",
+  "path": "/mcp",
+  "auth": {
+    "type": "oauth",
+    "issuer": "https://sbujblfdijrbbgtnjhef.supabase.co/auth/v1",
+    "accepted_audiences": [
+      "authenticated"
+    ]
+  },
+  "mcp": {
+    "server": {
+      "name": "onboard-genie",
+      "version": "0.1.0",
+      "title": "Onboard Genie"
+    },
+    "tools": [
+      {
+        "name": "list_hires",
+        "title": "List new hires",
+        "description": "List new hires with their onboarding task counts (completed, failed, waiting on approval).",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20,
+              "description": "How many hires to return."
+            },
+            "search": {
+              "type": "string",
+              "maxLength": 200,
+              "description": "Filter by name or email."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_hire_onboarding",
+        "title": "Get hire onboarding status",
+        "description": "Get one new hire's full onboarding detail: profile, every provisioning task with status and errors, and past approval decisions.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "hire_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "The hire's id, from list_hires."
+            }
+          },
+          "required": [
+            "hire_id"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_pending_approvals",
+        "title": "List pending approvals",
+        "description": "List onboarding tasks that are waiting for a human decision, with the hire they belong to.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 20,
+              "description": "How many tasks to return."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "decide_approval",
+        "title": "Approve or reject a task",
+        "description": "Record an approve/reject decision on an onboarding task that needs a human. Approved tasks continue provisioning; rejected tasks are marked failed.",
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "task_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "Task id from list_pending_approvals."
+            },
+            "decision": {
+              "type": "string",
+              "enum": [
+                "approved",
+                "rejected"
+              ],
+              "description": "The decision to record."
+            },
+            "note": {
+              "type": "string",
+              "minLength": 3,
+              "maxLength": 1000,
+              "description": "Short reason for the decision."
+            }
+          },
+          "required": [
+            "task_id",
+            "decision",
+            "note"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
