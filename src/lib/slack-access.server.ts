@@ -211,32 +211,42 @@ export async function grantSlackAccess(orgId: string, hireId: string): Promise<A
     return { ok: false, channels: [], error: message };
   }
 
-  const lookup = await slackCallForOrg(orgId, "users.lookupByEmail", { email: row.email });
-  if (!lookup.ok) {
-    const message =
-      lookup.error === "users_not_found"
-        ? `No Slack account found for ${row.email}. Invite them to the workspace first.`
-        : lookup.error === "missing_scope"
-          ? "Slack app is missing the users:read.email scope needed to find people by email."
-          : lookup.error === "slack_not_connected"
-            ? "This organization has not connected a Slack workspace yet."
-            : `Slack lookup failed (${lookup.error ?? "unknown error"}).`;
-    await recordTask(orgId, hireId, action, "failed", {
-      reason: `Invite ${row.full_name} to #${targets.join(", #")}`,
-      error: message,
-      raw: lookup.raw.slice(0, 4000),
-    });
-    return { ok: false, channels: [], error: message };
-  }
+  const lookup = await lookupSlackUserId(orgId, row.email);
+  let slackUserId = lookup.id;
 
-  const slackUserId = (JSON.parse(lookup.raw) as { user?: { id?: string } }).user?.id;
+  // Not in the workspace yet: membership comes first, channel access after.
   if (!slackUserId) {
-    const message = "Slack returned no user for that email address.";
-    await recordTask(orgId, hireId, action, "failed", {
-      reason: `Invite ${row.full_name} to #${targets.join(", #")}`,
-      error: message,
-    });
-    return { ok: false, channels: [], error: message };
+    if (lookup.error === "missing_scope") {
+      const message =
+        "Slack app is missing the users:read.email scope needed to find people by email.";
+      await recordTask(orgId, hireId, action, "failed", {
+        reason: `Invite ${row.full_name} to #${targets.join(", #")}`,
+        error: message,
+        raw: lookup.raw.slice(0, 4000),
+      });
+      return { ok: false, channels: [], error: message };
+    }
+    if (lookup.error === "slack_not_connected") {
+      const message = "No Slack workspace is connected yet (Wiring → Slack).";
+      await recordTask(orgId, hireId, action, "failed", {
+        reason: `Invite ${row.full_name} to #${targets.join(", #")}`,
+        error: message,
+      });
+      return { ok: false, channels: [], error: message };
+    }
+
+    const invited = await inviteToWorkspace(orgId, hireId);
+    slackUserId = invited.slackUserId;
+    if (!slackUserId) {
+      const message =
+        invited.error ??
+        `${row.full_name} is not a member of the Slack workspace yet, so channel access cannot be granted.`;
+      await recordTask(orgId, hireId, action, "needs_human", {
+        reason: `Invite ${row.full_name} to #${targets.join(", #")} once they join the workspace`,
+        error: message,
+      });
+      return { ok: false, channels: [], error: message };
+    }
   }
 
   const joined: string[] = [];
