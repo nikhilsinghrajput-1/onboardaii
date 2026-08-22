@@ -43,9 +43,6 @@ function IntegrationsPage() {
 
   const fetchStatus = useServerFn(getIntegrationStatus);
   const fetchConnections = useServerFn(listOrgConnections);
-  const startConnect = useServerFn(startOrgConnection);
-  const completeConnect = useServerFn(completeOrgConnection);
-  const removeConnect = useServerFn(disconnectOrgConnection);
   const saveSettings = useServerFn(saveOrgSettings);
 
   const status = useQuery({
