@@ -16,8 +16,6 @@ const settingsInput = z.object({
   orgId: z.string().uuid(),
   slackApprovalChannel: z.string().max(120).nullable(),
   slackAlertChannel: z.string().max(120).nullable(),
-  resumeUrl: z.string().url().max(500).nullable(),
-  flowTriggerUrl: z.string().url().max(500).nullable(),
 });
 
 export const decideTask = createServerFn({ method: "POST" })
@@ -58,8 +56,6 @@ export const getIntegrationStatus = createServerFn({ method: "GET" })
       slack: slackConnected,
       approvalChannel: org.slack_approval_channel,
       alertChannel: org.slack_alert_channel,
-      resumeUrl: org.resume_url,
-      flowTriggerUrl: org.flow_trigger_url,
     };
   });
 

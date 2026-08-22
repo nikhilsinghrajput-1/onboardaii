@@ -9,8 +9,6 @@ export type Organization = {
   webhook_secret: string;
   slack_approval_channel: string | null;
   slack_alert_channel: string | null;
-  resume_url: string | null;
-  flow_trigger_url: string | null;
   created_at: string;
 };
 
@@ -24,7 +22,7 @@ export type Member = {
 };
 
 const ORG_COLUMNS =
-  "id, name, slug, webhook_secret, slack_approval_channel, slack_alert_channel, resume_url, flow_trigger_url, created_at";
+  "id, name, slug, webhook_secret, slack_approval_channel, slack_alert_channel, created_at";
 
 /** This is a single-organization, internal-only workspace: there is exactly one row. */
 export const orgQuery = queryOptions({
