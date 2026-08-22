@@ -227,7 +227,7 @@ export function LandingPage() {
 
           <div className="ml-auto flex items-center gap-2 md:ml-0">
             <Button asChild variant="ghost" size="sm">
-              <Link to="/auth">Sign in</Link>
+              <Link to="/auth" search={{ next: "/dashboard" }}>Sign in</Link>
             </Button>
             <Button asChild size="sm">
               <Link to="/dashboard">
@@ -476,7 +476,7 @@ export function LandingPage() {
                   </Link>
                 </Button>
                 <Button asChild size="lg" variant="outline">
-                  <Link to="/auth">Sign in</Link>
+                  <Link to="/auth" search={{ next: "/dashboard" }}>Sign in</Link>
                 </Button>
               </div>
             </CardContent>
@@ -501,7 +501,7 @@ export function LandingPage() {
                   {item.label}
                 </a>
               ))}
-              <Link to="/auth" className="text-xs text-muted-foreground hover:text-foreground">
+              <Link to="/auth" search={{ next: "/dashboard" }} className="text-xs text-muted-foreground hover:text-foreground">
                 Sign in
               </Link>
             </nav>
