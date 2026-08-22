@@ -271,13 +271,15 @@ function IntegrationsPage() {
         </Button>
       </section>
 
+      <MembersCard orgId={orgId} canManage={isOwner} />
+
       <section className="mt-12 space-y-4">
         <h2 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-          Endpoints for {slug}
+          Endpoints
         </h2>
         <p className="text-sm text-muted-foreground">
-          Sign the raw JSON body with HMAC-SHA256 using this organization's signing secret and send
-          it as <code className="font-mono text-xs">x-viasocket-signature</code>. Unsigned calls are
+          Sign the raw JSON body with HMAC-SHA256 using the signing secret below and send it as{" "}
+          <code className="font-mono text-xs">x-viasocket-signature</code>. Unsigned calls are
           rejected.
         </p>
         <div className="rounded-xl border border-border/70 bg-card p-5">
@@ -287,8 +289,9 @@ function IntegrationsPage() {
           </p>
         </div>
         <Endpoint
-          path={`${origin}/api/public/viasocket/${slug}/hire`}
-          description="Called when a new hire record is created. Upserts on external_id within your organization."
+          path={`${origin}/api/public/onboarding/hire`}
+          description="Called when a new hire record is created. Upserts on external_id."
+
           sample={`{
   "external_id": "WD-10044",
   "full_name": "Sam Okafor",
