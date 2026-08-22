@@ -1,4 +1,4 @@
-import { createHmac } from "node:crypto";
+import { createHmac, randomBytes } from "node:crypto";
 
 import { loadOrgById } from "./org-ops.server";
 
@@ -44,6 +44,9 @@ export async function triggerHireFlow(
   if (hireError || !hire) return { ok: false, error: hireError?.message ?? "Hire not found" };
 
   const origin = appOrigin.replace(/\/$/, "");
+  // One-time temporary password for the Google Workspace create-user step in the
+  // flow. Generated per dispatch and never stored in the database.
+  const tempPassword = `Ob-${randomBytes(9).toString("base64url")}!7`;
   const payload = {
     event: "hire.created",
     org: { id: org.id, slug: org.slug, name: org.name },
@@ -62,6 +65,7 @@ export async function triggerHireFlow(
       on_call: hire.on_call,
       direct_reports: hire.direct_reports,
       owning_team: hire.owning_team,
+      temp_password: tempPassword,
     },
     slack: { channel_name: hire.slack_channel_name },
     callbacks: {
