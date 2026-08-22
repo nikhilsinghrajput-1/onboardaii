@@ -75,8 +75,8 @@ export function NewHireDialog({ orgId }: { orgId: string | undefined }) {
         <DialogHeader>
           <DialogTitle>Add a new hire</DialogTitle>
           <DialogDescription>
-            Creates the hire, opens their onboarding channel, and gives them access to #general in
-            this organization&apos;s Slack workspace.
+            Creates the hire record and sends it to the automation flow, which does the
+            provisioning and pushes task updates back here.
           </DialogDescription>
         </DialogHeader>
         <form
