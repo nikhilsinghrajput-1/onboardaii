@@ -1,7 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-// Legacy path kept working: this workspace is single-tenant, so the slug is ignored.
-export const Route = createFileRoute("/api/public/viasocket/$orgSlug/task")({
+export const Route = createFileRoute("/api/public/onboarding/task")({
   server: {
     handlers: {
       POST: async ({ request }) => {

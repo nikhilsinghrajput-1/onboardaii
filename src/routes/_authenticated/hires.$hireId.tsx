@@ -20,7 +20,7 @@ import { useOrgContext } from "@/lib/org-context";
 export const Route = createFileRoute("/_authenticated/hires/$hireId")({
   head: () => ({
     meta: [
-      { title: "Hire provisioning detail · Onboarding Control" },
+      { title: "Hire provisioning detail · Acropolis Onboarding" },
       {
         name: "description",
         content:

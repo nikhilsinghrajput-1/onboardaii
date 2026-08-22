@@ -71,8 +71,8 @@ export async function triggerHireFlow(
     },
     slack: { channel_name: hire.slack_channel_name || "general" },
     callbacks: {
-      task_url: `${origin}/api/public/viasocket/${org.slug}/task`,
-      hire_url: `${origin}/api/public/viasocket/${org.slug}/hire`,
+      task_url: `${origin}/api/public/onboarding/task`,
+      hire_url: `${origin}/api/public/onboarding/hire`,
     },
   };
 

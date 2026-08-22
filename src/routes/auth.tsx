@@ -10,13 +10,13 @@ import { lovable } from "@/integrations/lovable/index";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Sign in · Onboarding Control" },
+      { title: "Sign in · Acropolis Onboarding" },
       {
         name: "description",
         content:
-          "Sign in to Onboarding Control to review new-hire provisioning status and approve sensitive access requests.",
+          "Sign in to Acropolis Onboarding to review new-hire provisioning status and approve sensitive access requests.",
       },
-      { property: "og:title", content: "Sign in · Onboarding Control" },
+      { property: "og:title", content: "Sign in · Acropolis Onboarding" },
       {
         property: "og:description",
         content: "Access the new-hire provisioning dashboard and approval queue.",
@@ -83,7 +83,7 @@ function AuthPage() {
   return (
     <main className="grid min-h-screen place-items-center px-4 py-16">
       <div className="w-full max-w-sm">
-        <p className="font-mono text-xs uppercase tracking-[0.25em] text-wait">Onboarding Control</p>
+        <p className="font-mono text-xs uppercase tracking-[0.25em] text-wait">Acropolis Onboarding</p>
         <h1 className="mt-3 text-2xl font-semibold tracking-tight">
           {mode === "signin" ? "Sign in" : "Create an account"}
         </h1>

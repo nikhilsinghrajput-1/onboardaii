@@ -16,16 +16,23 @@ export type OrgRow = {
 const ORG_COLUMNS =
   "id, name, slug, webhook_secret, slack_approval_channel, slack_alert_channel, resume_url, flow_trigger_url";
 
-export async function loadOrgBySlug(slug: string): Promise<OrgRow | null> {
+/** Single-tenant: there is exactly one organization row (Acropolis). */
+export async function getSingleOrg(): Promise<OrgRow | null> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data, error } = await supabaseAdmin
     .from("organizations")
     .select(ORG_COLUMNS)
-    .eq("slug", slug)
+    .limit(1)
     .maybeSingle();
   if (error) throw error;
   return (data as OrgRow | null) ?? null;
 }
+
+/** Legacy slug-scoped webhook paths resolve to the same single organization. */
+export async function loadOrgBySlug(_slug: string): Promise<OrgRow | null> {
+  return getSingleOrg();
+}
+
 
 export async function loadOrgById(id: string): Promise<OrgRow | null> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");

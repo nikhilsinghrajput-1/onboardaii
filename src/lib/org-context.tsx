@@ -1,48 +1,64 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 
-import { orgsQuery, readActiveOrgId, writeActiveOrgId, type Organization } from "@/lib/orgs";
+import { supabase } from "@/integrations/supabase/client";
+import { orgQuery, type Organization } from "@/lib/orgs";
 
 type OrgContextValue = {
-  orgs: Organization[];
+  /** The one and only organization this internal tool serves. */
   activeOrg: Organization | null;
   isLoading: boolean;
   error: unknown;
-  setActiveOrg: (id: string) => void;
+  /** Null while unknown; false when the signed-in user has not been given access. */
+  isMember: boolean | null;
+  isOwner: boolean;
+  userEmail: string | null;
 };
 
 const OrgContext = createContext<OrgContextValue | null>(null);
 
 export function OrgProvider({ children }: { children: ReactNode }) {
-  const orgs = useQuery(orgsQuery);
-  const [activeId, setActiveId] = useState<string | null>(() => readActiveOrgId());
+  const org = useQuery(orgQuery);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
 
-  const list = orgs.data ?? [];
-  const activeOrg = list.find((o) => o.id === activeId) ?? null;
-
-  // Fall back to the only / first membership when nothing valid is stored.
   useEffect(() => {
-    if (orgs.isLoading || list.length === 0) return;
-    if (!activeOrg) {
-      const next = list[0]!;
-      setActiveId(next.id);
-      writeActiveOrgId(next.id);
-    }
-  }, [orgs.isLoading, list, activeOrg]);
+    let cancelled = false;
+    void supabase.auth.getUser().then(({ data }) => {
+      if (cancelled) return;
+      setUserEmail(data.user?.email ?? null);
+      setUserId(data.user?.id ?? null);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
-  const value = useMemo<OrgContextValue>(
-    () => ({
-      orgs: list,
-      activeOrg,
-      isLoading: orgs.isLoading,
-      error: orgs.error,
-      setActiveOrg: (id: string) => {
-        setActiveId(id);
-        writeActiveOrgId(id);
-      },
-    }),
-    [list, activeOrg, orgs.isLoading, orgs.error],
-  );
+  const role = useQuery({
+    queryKey: ["my-membership", userId],
+    enabled: Boolean(userId),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("organization_members")
+        .select("role")
+        .eq("user_id", userId!)
+        .maybeSingle();
+      if (error) throw error;
+      return (data?.role as "owner" | "member" | undefined) ?? null;
+    },
+  });
+
+  const value = useMemo<OrgContextValue>(() => {
+    const loading = org.isLoading || role.isLoading || !userId;
+    return {
+      activeOrg: org.data ?? null,
+      isLoading: loading,
+      error: org.error,
+      isMember: loading ? null : Boolean(role.data),
+      isOwner: role.data === "owner",
+      userEmail,
+    };
+  }, [org.data, org.isLoading, org.error, role.data, role.isLoading, userId, userEmail]);
 
   return <OrgContext.Provider value={value}>{children}</OrgContext.Provider>;
 }

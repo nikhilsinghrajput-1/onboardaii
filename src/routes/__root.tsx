@@ -78,12 +78,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Onboarding Control" },
+      { title: "Acropolis Onboarding" },
       {
         name: "description",
         content: "Live new hire provisioning status, approvals, and failure alerts.",
       },
-      { property: "og:title", content: "Onboarding Control" },
+      { property: "og:title", content: "Acropolis Onboarding" },
       {
         property: "og:description",
         content: "Live new hire provisioning status, approvals, and failure alerts.",

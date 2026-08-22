@@ -16,21 +16,22 @@ import {
   startOrgConnection,
 } from "@/lib/connections.functions";
 import { CONNECTOR_CATALOG } from "@/lib/connector-catalog";
+import { MembersCard } from "@/components/MembersCard";
 import { useOrgContext } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_authenticated/integrations")({
   head: () => ({
     meta: [
-      { title: "Wiring · Onboarding Control" },
+      { title: "Wiring · Acropolis Onboarding" },
       {
         name: "description",
         content:
-          "Connect your organization's own tools, set the approval and alert channels, and copy the signed webhook endpoints your automation posts into.",
+          "Connect Acropolis's tools, set the approval and alert channels, manage who has access, and copy the signed webhook endpoints the automation posts into.",
       },
-      { property: "og:title", content: "Wiring" },
+      { property: "og:title", content: "Wiring · Acropolis Onboarding" },
       {
         property: "og:description",
-        content: "Connect your tools and copy the webhook endpoints for your organization.",
+        content: "Connect tools, manage members, and copy the Acropolis webhook endpoints.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -38,6 +39,7 @@ export const Route = createFileRoute("/_authenticated/integrations")({
   }),
   component: IntegrationsPage,
 });
+
 
 function Endpoint({ path, description, sample }: { path: string; description: string; sample: string }) {
   return (
@@ -52,9 +54,10 @@ function Endpoint({ path, description, sample }: { path: string; description: st
 }
 
 function IntegrationsPage() {
-  const { activeOrg } = useOrgContext();
+  const { activeOrg, isOwner } = useOrgContext();
   const orgId = activeOrg?.id;
   const queryClient = useQueryClient();
+
 
   const fetchStatus = useServerFn(getIntegrationStatus);
   const fetchConnections = useServerFn(listOrgConnections);
@@ -102,7 +105,7 @@ function IntegrationsPage() {
     onSuccess: () => {
       toast.success("Saved.");
       void queryClient.invalidateQueries({ queryKey: ["integration-status", orgId] });
-      void queryClient.invalidateQueries({ queryKey: ["organizations"] });
+      void queryClient.invalidateQueries({ queryKey: ["organization"] });
     },
     onError: (error) =>
       toast.error(error instanceof Error ? error.message : "Could not save those settings."),
@@ -150,16 +153,15 @@ function IntegrationsPage() {
   }
 
   const origin = typeof window === "undefined" ? "" : window.location.origin;
-  const slug = status.data?.slug ?? activeOrg?.slug ?? "your-org";
 
   return (
     <main className="mx-auto max-w-4xl px-6 py-10">
       <h1 className="text-2xl font-semibold tracking-tight">Wiring</h1>
       <p className="mt-1 text-sm text-muted-foreground">
-        {activeOrg?.name ?? "This organization"} connects its own tools here. The automation keeps
-        running the reasoning, dispatch, and retries — it pushes state into the endpoints below and
-        this dashboard pushes decisions back.
+        Acropolis connects its tools here. The automation keeps running the reasoning, dispatch, and
+        retries — it pushes state into the endpoints below and this dashboard pushes decisions back.
       </p>
+
 
       <section className="mt-10">
         <h2 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
@@ -269,13 +271,15 @@ function IntegrationsPage() {
         </Button>
       </section>
 
+      <MembersCard orgId={orgId} canManage={isOwner} />
+
       <section className="mt-12 space-y-4">
         <h2 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
-          Endpoints for {slug}
+          Endpoints
         </h2>
         <p className="text-sm text-muted-foreground">
-          Sign the raw JSON body with HMAC-SHA256 using this organization's signing secret and send
-          it as <code className="font-mono text-xs">x-viasocket-signature</code>. Unsigned calls are
+          Sign the raw JSON body with HMAC-SHA256 using the signing secret below and send it as{" "}
+          <code className="font-mono text-xs">x-viasocket-signature</code>. Unsigned calls are
           rejected.
         </p>
         <div className="rounded-xl border border-border/70 bg-card p-5">
@@ -285,8 +289,9 @@ function IntegrationsPage() {
           </p>
         </div>
         <Endpoint
-          path={`${origin}/api/public/viasocket/${slug}/hire`}
-          description="Called when a new hire record is created. Upserts on external_id within your organization."
+          path={`${origin}/api/public/onboarding/hire`}
+          description="Called when a new hire record is created. Upserts on external_id."
+
           sample={`{
   "external_id": "WD-10044",
   "full_name": "Sam Okafor",
@@ -304,7 +309,7 @@ function IntegrationsPage() {
 }`}
         />
         <Endpoint
-          path={`${origin}/api/public/viasocket/${slug}/task`}
+          path={`${origin}/api/public/onboarding/task`}
           description="Called after every action step. A first-time needs_human posts an approval request; a first-time failed fires the alert with the raw response attached."
           sample={`{
   "hire_external_id": "WD-10044",
