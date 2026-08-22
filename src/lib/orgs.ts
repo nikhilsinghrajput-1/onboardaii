@@ -44,7 +44,7 @@ export const orgsQuery = queryOptions({
     const { data, error } = await supabase
       .from("organizations")
       .select(
-        "id, name, slug, webhook_secret, slack_approval_channel, slack_alert_channel, resume_url, created_at",
+        "id, name, slug, webhook_secret, slack_approval_channel, slack_alert_channel, resume_url, flow_trigger_url, created_at",
       )
       .order("created_at", { ascending: true });
     if (error) throw error;
