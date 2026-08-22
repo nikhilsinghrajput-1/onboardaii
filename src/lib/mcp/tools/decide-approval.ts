@@ -13,6 +13,7 @@ export default defineTool({
     decision: z.enum(["approved", "rejected"]).describe("The decision to record."),
     note: z.string().trim().min(3).max(1000).describe("Short reason for the decision."),
   },
+  outputSchema: { result: z.record(z.unknown()) },
   annotations: { readOnlyHint: false, destructiveHint: false, openWorldHint: false },
   handler: async ({ task_id, decision, note }, ctx) => {
     if (!ctx.isAuthenticated()) {

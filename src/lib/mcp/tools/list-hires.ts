@@ -12,6 +12,7 @@ export default defineTool({
     limit: z.number().int().min(1).max(50).default(20).describe("How many hires to return."),
     search: z.string().trim().max(200).optional().describe("Filter by name or email."),
   },
+  outputSchema: { hires: z.array(z.record(z.unknown())) },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ limit, search }, ctx) => {
     if (!ctx.isAuthenticated()) {

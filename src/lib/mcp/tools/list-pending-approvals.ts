@@ -11,6 +11,7 @@ export default defineTool({
   inputSchema: {
     limit: z.number().int().min(1).max(50).default(20).describe("How many tasks to return."),
   },
+  outputSchema: { pending: z.array(z.record(z.unknown())) },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ limit }, ctx) => {
     if (!ctx.isAuthenticated()) {

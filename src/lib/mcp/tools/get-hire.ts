@@ -11,6 +11,11 @@ export default defineTool({
   inputSchema: {
     hire_id: z.string().uuid().describe("The hire's id, from list_hires."),
   },
+  outputSchema: {
+    hire: z.record(z.unknown()),
+    tasks: z.array(z.record(z.unknown())),
+    approvals: z.array(z.record(z.unknown())),
+  },
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ hire_id }, ctx) => {
     if (!ctx.isAuthenticated()) {
