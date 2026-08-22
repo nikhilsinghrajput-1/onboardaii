@@ -3,7 +3,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { createHireChannel, grantHireSlackAccess } from "@/lib/hires.functions";
+import { createHireChannel, grantHireSlackAccess, retriggerHireFlow } from "@/lib/hires.functions";
 import type { Hire } from "@/lib/dashboard-data";
 
 export function HireChannelCard({ hire, orgId }: { hire: Hire; orgId: string | undefined }) {
