@@ -50,7 +50,7 @@ export async function gatewayCall<T = unknown>(
     const res = await fetch(`${GATEWAY_BASE_URL}/${connectorId}${path}`, {
       method: init.method ?? (init.body === undefined ? "GET" : "POST"),
       headers,
-      body: init.body === undefined ? undefined : JSON.stringify(init.body),
+      ...(init.body === undefined ? {} : { body: JSON.stringify(init.body) }),
     });
     const raw = await res.text();
     if (!res.ok) {

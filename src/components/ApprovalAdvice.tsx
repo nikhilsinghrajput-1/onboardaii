@@ -39,7 +39,7 @@ export function ApprovalAdvice({ orgId, taskId }: { orgId: string | undefined; t
           risk copilot
         </span>
         <span
-          className={`rounded-full border px-2 py-0.5 text-[11px] ${RISK_TONE[advice.data.risk] ?? RISK_TONE.medium}`}
+          className={`rounded-full border px-2 py-0.5 text-[11px] ${RISK_TONE[advice.data.risk] ?? RISK_TONE["medium"]}`}
         >
           {advice.data.risk} risk
         </span>

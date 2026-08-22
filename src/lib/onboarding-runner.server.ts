@@ -429,7 +429,10 @@ export async function runOnboarding(
       const step = await toolStep.run(hire, org.name);
       if (step.patch) {
         const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-        await supabaseAdmin.from("hires").update(step.patch).eq("id", hire.id);
+        await supabaseAdmin
+          .from("hires")
+          .update(step.patch as never)
+          .eq("id", hire.id);
         hire = (await loadHire(orgId, hireId)) ?? hire;
       }
       await upsertTask(hire, planned, {
