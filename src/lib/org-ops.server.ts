@@ -10,10 +10,11 @@ export type OrgRow = {
   slack_approval_channel: string | null;
   slack_alert_channel: string | null;
   resume_url: string | null;
+  flow_trigger_url: string | null;
 };
 
 const ORG_COLUMNS =
-  "id, name, slug, webhook_secret, slack_approval_channel, slack_alert_channel, resume_url";
+  "id, name, slug, webhook_secret, slack_approval_channel, slack_alert_channel, resume_url, flow_trigger_url";
 
 export async function loadOrgBySlug(slug: string): Promise<OrgRow | null> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
