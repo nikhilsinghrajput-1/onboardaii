@@ -131,8 +131,6 @@ export type Database = {
           email: string | null
           employment_type: string | null
           external_id: string | null
-          flow_trigger_error: string | null
-          flow_triggered_at: string | null
           full_name: string
           id: string
           location: string | null
@@ -155,8 +153,6 @@ export type Database = {
           email?: string | null
           employment_type?: string | null
           external_id?: string | null
-          flow_trigger_error?: string | null
-          flow_triggered_at?: string | null
           full_name: string
           id?: string
           location?: string | null
@@ -179,8 +175,6 @@ export type Database = {
           email?: string | null
           employment_type?: string | null
           external_id?: string | null
-          flow_trigger_error?: string | null
-          flow_triggered_at?: string | null
           full_name?: string
           id?: string
           location?: string | null
@@ -352,10 +346,8 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string
-          flow_trigger_url: string | null
           id: string
           name: string
-          resume_url: string | null
           slack_alert_channel: string | null
           slack_approval_channel: string | null
           slug: string
@@ -365,10 +357,8 @@ export type Database = {
         Insert: {
           created_at?: string
           created_by: string
-          flow_trigger_url?: string | null
           id?: string
           name: string
-          resume_url?: string | null
           slack_alert_channel?: string | null
           slack_approval_channel?: string | null
           slug: string
@@ -378,72 +368,13 @@ export type Database = {
         Update: {
           created_at?: string
           created_by?: string
-          flow_trigger_url?: string | null
           id?: string
           name?: string
-          resume_url?: string | null
           slack_alert_channel?: string | null
           slack_approval_channel?: string | null
           slug?: string
           updated_at?: string
           webhook_secret?: string
-        }
-        Relationships: []
-      }
-      relay_deliveries: {
-        Row: {
-          attempts: number
-          callback_host: string
-          callback_url: string
-          created_at: string
-          duration_ms: number | null
-          employee_email: string | null
-          endpoint_type: string
-          error: string | null
-          event: string | null
-          hire_ref: string | null
-          id: string
-          ok: boolean
-          payload_preview: string | null
-          response_preview: string | null
-          source: string
-          status_code: number | null
-        }
-        Insert: {
-          attempts?: number
-          callback_host: string
-          callback_url: string
-          created_at?: string
-          duration_ms?: number | null
-          employee_email?: string | null
-          endpoint_type: string
-          error?: string | null
-          event?: string | null
-          hire_ref?: string | null
-          id?: string
-          ok?: boolean
-          payload_preview?: string | null
-          response_preview?: string | null
-          source?: string
-          status_code?: number | null
-        }
-        Update: {
-          attempts?: number
-          callback_host?: string
-          callback_url?: string
-          created_at?: string
-          duration_ms?: number | null
-          employee_email?: string | null
-          endpoint_type?: string
-          error?: string | null
-          event?: string | null
-          hire_ref?: string | null
-          id?: string
-          ok?: boolean
-          payload_preview?: string | null
-          response_preview?: string | null
-          source?: string
-          status_code?: number | null
         }
         Relationships: []
       }

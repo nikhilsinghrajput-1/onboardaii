@@ -9,12 +9,10 @@ export type OrgRow = {
   webhook_secret: string;
   slack_approval_channel: string | null;
   slack_alert_channel: string | null;
-  resume_url: string | null;
-  flow_trigger_url: string | null;
 };
 
 const ORG_COLUMNS =
-  "id, name, slug, webhook_secret, slack_approval_channel, slack_alert_channel, resume_url, flow_trigger_url";
+  "id, name, slug, webhook_secret, slack_approval_channel, slack_alert_channel";
 
 /** Single-tenant: there is exactly one organization row (Acropolis). */
 export async function getSingleOrg(): Promise<OrgRow | null> {
@@ -27,12 +25,6 @@ export async function getSingleOrg(): Promise<OrgRow | null> {
   if (error) throw error;
   return (data as OrgRow | null) ?? null;
 }
-
-/** Legacy slug-scoped webhook paths resolve to the same single organization. */
-export async function loadOrgBySlug(_slug: string): Promise<OrgRow | null> {
-  return getSingleOrg();
-}
-
 
 export async function loadOrgById(id: string): Promise<OrgRow | null> {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -137,31 +129,5 @@ export async function slackCallForOrg(
     const raw = error instanceof Error ? error.message : String(error);
     console.error(`Slack ${method} threw: ${raw}`);
     return { ok: false, error: "request_failed", raw };
-  }
-}
-
-/** Posts a human decision back to the organization's own flow resume URL. */
-export async function resumeForOrg(
-  org: OrgRow,
-  body: Record<string, unknown>,
-): Promise<{ ok: boolean; detail: string }> {
-  const url = org.resume_url ?? process.env["VIASOCKET_RESUME_URL"];
-  if (!url) return { ok: false, detail: "No flow resume URL configured for this organization" };
-  try {
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    });
-    const text = await res.text();
-    if (!res.ok) {
-      console.error(`flow resume failed [${res.status}]: ${text}`);
-      return { ok: false, detail: `[${res.status}] ${text}` };
-    }
-    return { ok: true, detail: text.slice(0, 500) };
-  } catch (error) {
-    const detail = error instanceof Error ? error.message : String(error);
-    console.error(`flow resume threw: ${detail}`);
-    return { ok: false, detail };
   }
 }

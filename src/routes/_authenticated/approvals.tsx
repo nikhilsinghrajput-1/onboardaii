@@ -53,9 +53,9 @@ function ApprovalsPage() {
         return;
       }
       toast.success(
-        result.resumed
-          ? "Decision recorded and sent back to the flow."
-          : "Decision recorded. The flow callback is not configured yet.",
+        result.executed
+          ? "Approved — the step is marked done and Slack has been notified."
+          : "Decision recorded.",
       );
       void queryClient.invalidateQueries({ queryKey: ["tasks"] });
       void queryClient.invalidateQueries({ queryKey: ["approvals"] });

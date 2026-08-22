@@ -16,18 +16,9 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedApprovalsRouteImport } from './routes/_authenticated/approvals'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedIntegrationsRouteImport } from './routes/_authenticated/integrations'
-import { Route as AuthenticatedRelayRouteImport } from './routes/_authenticated/relay'
 import { Route as AuthenticatedHiresHireIdRouteImport } from './routes/_authenticated/hires.$hireId'
 import { Route as OauthConnectorReturnRouteImport } from './routes/oauth/$connector/return'
-import { Route as ApiPublicOnboardingHealthRouteImport } from './routes/api/public/onboarding/health'
-import { Route as ApiPublicOnboardingHireRouteImport } from './routes/api/public/onboarding/hire'
-import { Route as ApiPublicOnboardingHireUpdateRouteImport } from './routes/api/public/onboarding/hire-update'
-import { Route as ApiPublicOnboardingRelayRouteImport } from './routes/api/public/onboarding/relay'
-import { Route as ApiPublicOnboardingTaskRouteImport } from './routes/api/public/onboarding/task'
-import { Route as ApiPublicOnboardingTaskUpdateRouteImport } from './routes/api/public/onboarding/task-update'
 import { Route as ApiPublicSlackEventsRouteImport } from './routes/api/public/slack/events'
-import { Route as ApiPublicViasocketOrgSlugHireRouteImport } from './routes/api/public/viasocket/$orgSlug/hire'
-import { Route as ApiPublicViasocketOrgSlugTaskRouteImport } from './routes/api/public/viasocket/$orgSlug/task'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -64,11 +55,6 @@ const AuthenticatedIntegrationsRoute =
     path: '/integrations',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const AuthenticatedRelayRoute = AuthenticatedRelayRouteImport.update({
-  id: '/relay',
-  path: '/relay',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedHiresHireIdRoute =
   AuthenticatedHiresHireIdRouteImport.update({
     id: '/hires/$hireId',
@@ -80,57 +66,11 @@ const OauthConnectorReturnRoute = OauthConnectorReturnRouteImport.update({
   path: '/oauth/$connector/return',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicOnboardingHealthRoute =
-  ApiPublicOnboardingHealthRouteImport.update({
-    id: '/api/public/onboarding/health',
-    path: '/api/public/onboarding/health',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicOnboardingHireRoute = ApiPublicOnboardingHireRouteImport.update({
-  id: '/api/public/onboarding/hire',
-  path: '/api/public/onboarding/hire',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicOnboardingHireUpdateRoute =
-  ApiPublicOnboardingHireUpdateRouteImport.update({
-    id: '/api/public/onboarding/hire-update',
-    path: '/api/public/onboarding/hire-update',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicOnboardingRelayRoute =
-  ApiPublicOnboardingRelayRouteImport.update({
-    id: '/api/public/onboarding/relay',
-    path: '/api/public/onboarding/relay',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicOnboardingTaskRoute = ApiPublicOnboardingTaskRouteImport.update({
-  id: '/api/public/onboarding/task',
-  path: '/api/public/onboarding/task',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPublicOnboardingTaskUpdateRoute =
-  ApiPublicOnboardingTaskUpdateRouteImport.update({
-    id: '/api/public/onboarding/task-update',
-    path: '/api/public/onboarding/task-update',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 const ApiPublicSlackEventsRoute = ApiPublicSlackEventsRouteImport.update({
   id: '/api/public/slack/events',
   path: '/api/public/slack/events',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPublicViasocketOrgSlugHireRoute =
-  ApiPublicViasocketOrgSlugHireRouteImport.update({
-    id: '/api/public/viasocket/$orgSlug/hire',
-    path: '/api/public/viasocket/$orgSlug/hire',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicViasocketOrgSlugTaskRoute =
-  ApiPublicViasocketOrgSlugTaskRouteImport.update({
-    id: '/api/public/viasocket/$orgSlug/task',
-    path: '/api/public/viasocket/$orgSlug/task',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -139,18 +79,9 @@ export interface FileRoutesByFullPath {
   '/approvals': typeof AuthenticatedApprovalsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/integrations': typeof AuthenticatedIntegrationsRoute
-  '/relay': typeof AuthenticatedRelayRoute
   '/hires/$hireId': typeof AuthenticatedHiresHireIdRoute
   '/oauth/$connector/return': typeof OauthConnectorReturnRoute
-  '/api/public/onboarding/health': typeof ApiPublicOnboardingHealthRoute
-  '/api/public/onboarding/hire': typeof ApiPublicOnboardingHireRoute
-  '/api/public/onboarding/hire-update': typeof ApiPublicOnboardingHireUpdateRoute
-  '/api/public/onboarding/relay': typeof ApiPublicOnboardingRelayRoute
-  '/api/public/onboarding/task': typeof ApiPublicOnboardingTaskRoute
-  '/api/public/onboarding/task-update': typeof ApiPublicOnboardingTaskUpdateRoute
   '/api/public/slack/events': typeof ApiPublicSlackEventsRoute
-  '/api/public/viasocket/$orgSlug/hire': typeof ApiPublicViasocketOrgSlugHireRoute
-  '/api/public/viasocket/$orgSlug/task': typeof ApiPublicViasocketOrgSlugTaskRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -159,18 +90,9 @@ export interface FileRoutesByTo {
   '/approvals': typeof AuthenticatedApprovalsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/integrations': typeof AuthenticatedIntegrationsRoute
-  '/relay': typeof AuthenticatedRelayRoute
   '/hires/$hireId': typeof AuthenticatedHiresHireIdRoute
   '/oauth/$connector/return': typeof OauthConnectorReturnRoute
-  '/api/public/onboarding/health': typeof ApiPublicOnboardingHealthRoute
-  '/api/public/onboarding/hire': typeof ApiPublicOnboardingHireRoute
-  '/api/public/onboarding/hire-update': typeof ApiPublicOnboardingHireUpdateRoute
-  '/api/public/onboarding/relay': typeof ApiPublicOnboardingRelayRoute
-  '/api/public/onboarding/task': typeof ApiPublicOnboardingTaskRoute
-  '/api/public/onboarding/task-update': typeof ApiPublicOnboardingTaskUpdateRoute
   '/api/public/slack/events': typeof ApiPublicSlackEventsRoute
-  '/api/public/viasocket/$orgSlug/hire': typeof ApiPublicViasocketOrgSlugHireRoute
-  '/api/public/viasocket/$orgSlug/task': typeof ApiPublicViasocketOrgSlugTaskRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -181,18 +103,9 @@ export interface FileRoutesById {
   '/_authenticated/approvals': typeof AuthenticatedApprovalsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/integrations': typeof AuthenticatedIntegrationsRoute
-  '/_authenticated/relay': typeof AuthenticatedRelayRoute
   '/_authenticated/hires/$hireId': typeof AuthenticatedHiresHireIdRoute
   '/oauth/$connector/return': typeof OauthConnectorReturnRoute
-  '/api/public/onboarding/health': typeof ApiPublicOnboardingHealthRoute
-  '/api/public/onboarding/hire': typeof ApiPublicOnboardingHireRoute
-  '/api/public/onboarding/hire-update': typeof ApiPublicOnboardingHireUpdateRoute
-  '/api/public/onboarding/relay': typeof ApiPublicOnboardingRelayRoute
-  '/api/public/onboarding/task': typeof ApiPublicOnboardingTaskRoute
-  '/api/public/onboarding/task-update': typeof ApiPublicOnboardingTaskUpdateRoute
   '/api/public/slack/events': typeof ApiPublicSlackEventsRoute
-  '/api/public/viasocket/$orgSlug/hire': typeof ApiPublicViasocketOrgSlugHireRoute
-  '/api/public/viasocket/$orgSlug/task': typeof ApiPublicViasocketOrgSlugTaskRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -203,18 +116,9 @@ export interface FileRouteTypes {
     | '/approvals'
     | '/dashboard'
     | '/integrations'
-    | '/relay'
     | '/hires/$hireId'
     | '/oauth/$connector/return'
-    | '/api/public/onboarding/health'
-    | '/api/public/onboarding/hire'
-    | '/api/public/onboarding/hire-update'
-    | '/api/public/onboarding/relay'
-    | '/api/public/onboarding/task'
-    | '/api/public/onboarding/task-update'
     | '/api/public/slack/events'
-    | '/api/public/viasocket/$orgSlug/hire'
-    | '/api/public/viasocket/$orgSlug/task'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -223,18 +127,9 @@ export interface FileRouteTypes {
     | '/approvals'
     | '/dashboard'
     | '/integrations'
-    | '/relay'
     | '/hires/$hireId'
     | '/oauth/$connector/return'
-    | '/api/public/onboarding/health'
-    | '/api/public/onboarding/hire'
-    | '/api/public/onboarding/hire-update'
-    | '/api/public/onboarding/relay'
-    | '/api/public/onboarding/task'
-    | '/api/public/onboarding/task-update'
     | '/api/public/slack/events'
-    | '/api/public/viasocket/$orgSlug/hire'
-    | '/api/public/viasocket/$orgSlug/task'
   id:
     | '__root__'
     | '/'
@@ -244,18 +139,9 @@ export interface FileRouteTypes {
     | '/_authenticated/approvals'
     | '/_authenticated/dashboard'
     | '/_authenticated/integrations'
-    | '/_authenticated/relay'
     | '/_authenticated/hires/$hireId'
     | '/oauth/$connector/return'
-    | '/api/public/onboarding/health'
-    | '/api/public/onboarding/hire'
-    | '/api/public/onboarding/hire-update'
-    | '/api/public/onboarding/relay'
-    | '/api/public/onboarding/task'
-    | '/api/public/onboarding/task-update'
     | '/api/public/slack/events'
-    | '/api/public/viasocket/$orgSlug/hire'
-    | '/api/public/viasocket/$orgSlug/task'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -263,15 +149,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   OauthConnectorReturnRoute: typeof OauthConnectorReturnRoute
-  ApiPublicOnboardingHealthRoute: typeof ApiPublicOnboardingHealthRoute
-  ApiPublicOnboardingHireRoute: typeof ApiPublicOnboardingHireRoute
-  ApiPublicOnboardingHireUpdateRoute: typeof ApiPublicOnboardingHireUpdateRoute
-  ApiPublicOnboardingRelayRoute: typeof ApiPublicOnboardingRelayRoute
-  ApiPublicOnboardingTaskRoute: typeof ApiPublicOnboardingTaskRoute
-  ApiPublicOnboardingTaskUpdateRoute: typeof ApiPublicOnboardingTaskUpdateRoute
   ApiPublicSlackEventsRoute: typeof ApiPublicSlackEventsRoute
-  ApiPublicViasocketOrgSlugHireRoute: typeof ApiPublicViasocketOrgSlugHireRoute
-  ApiPublicViasocketOrgSlugTaskRoute: typeof ApiPublicViasocketOrgSlugTaskRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -325,13 +203,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIntegrationsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/relay': {
-      id: '/_authenticated/relay'
-      path: '/relay'
-      fullPath: '/relay'
-      preLoaderRoute: typeof AuthenticatedRelayRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/hires/$hireId': {
       id: '/_authenticated/hires/$hireId'
       path: '/hires/$hireId'
@@ -346,67 +217,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OauthConnectorReturnRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/public/onboarding/health': {
-      id: '/api/public/onboarding/health'
-      path: '/api/public/onboarding/health'
-      fullPath: '/api/public/onboarding/health'
-      preLoaderRoute: typeof ApiPublicOnboardingHealthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/onboarding/hire': {
-      id: '/api/public/onboarding/hire'
-      path: '/api/public/onboarding/hire'
-      fullPath: '/api/public/onboarding/hire'
-      preLoaderRoute: typeof ApiPublicOnboardingHireRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/onboarding/hire-update': {
-      id: '/api/public/onboarding/hire-update'
-      path: '/api/public/onboarding/hire-update'
-      fullPath: '/api/public/onboarding/hire-update'
-      preLoaderRoute: typeof ApiPublicOnboardingHireUpdateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/onboarding/relay': {
-      id: '/api/public/onboarding/relay'
-      path: '/api/public/onboarding/relay'
-      fullPath: '/api/public/onboarding/relay'
-      preLoaderRoute: typeof ApiPublicOnboardingRelayRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/onboarding/task': {
-      id: '/api/public/onboarding/task'
-      path: '/api/public/onboarding/task'
-      fullPath: '/api/public/onboarding/task'
-      preLoaderRoute: typeof ApiPublicOnboardingTaskRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/onboarding/task-update': {
-      id: '/api/public/onboarding/task-update'
-      path: '/api/public/onboarding/task-update'
-      fullPath: '/api/public/onboarding/task-update'
-      preLoaderRoute: typeof ApiPublicOnboardingTaskUpdateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/public/slack/events': {
       id: '/api/public/slack/events'
       path: '/api/public/slack/events'
       fullPath: '/api/public/slack/events'
       preLoaderRoute: typeof ApiPublicSlackEventsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/viasocket/$orgSlug/hire': {
-      id: '/api/public/viasocket/$orgSlug/hire'
-      path: '/api/public/viasocket/$orgSlug/hire'
-      fullPath: '/api/public/viasocket/$orgSlug/hire'
-      preLoaderRoute: typeof ApiPublicViasocketOrgSlugHireRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/viasocket/$orgSlug/task': {
-      id: '/api/public/viasocket/$orgSlug/task'
-      path: '/api/public/viasocket/$orgSlug/task'
-      fullPath: '/api/public/viasocket/$orgSlug/task'
-      preLoaderRoute: typeof ApiPublicViasocketOrgSlugTaskRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -417,7 +232,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedApprovalsRoute: typeof AuthenticatedApprovalsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedIntegrationsRoute: typeof AuthenticatedIntegrationsRoute
-  AuthenticatedRelayRoute: typeof AuthenticatedRelayRoute
   AuthenticatedHiresHireIdRoute: typeof AuthenticatedHiresHireIdRoute
 }
 
@@ -426,7 +240,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedApprovalsRoute: AuthenticatedApprovalsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedIntegrationsRoute: AuthenticatedIntegrationsRoute,
-  AuthenticatedRelayRoute: AuthenticatedRelayRoute,
   AuthenticatedHiresHireIdRoute: AuthenticatedHiresHireIdRoute,
 }
 
@@ -438,15 +251,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   OauthConnectorReturnRoute: OauthConnectorReturnRoute,
-  ApiPublicOnboardingHealthRoute: ApiPublicOnboardingHealthRoute,
-  ApiPublicOnboardingHireRoute: ApiPublicOnboardingHireRoute,
-  ApiPublicOnboardingHireUpdateRoute: ApiPublicOnboardingHireUpdateRoute,
-  ApiPublicOnboardingRelayRoute: ApiPublicOnboardingRelayRoute,
-  ApiPublicOnboardingTaskRoute: ApiPublicOnboardingTaskRoute,
-  ApiPublicOnboardingTaskUpdateRoute: ApiPublicOnboardingTaskUpdateRoute,
   ApiPublicSlackEventsRoute: ApiPublicSlackEventsRoute,
-  ApiPublicViasocketOrgSlugHireRoute: ApiPublicViasocketOrgSlugHireRoute,
-  ApiPublicViasocketOrgSlugTaskRoute: ApiPublicViasocketOrgSlugTaskRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

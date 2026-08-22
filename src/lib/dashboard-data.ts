@@ -27,8 +27,6 @@ export type Hire = {
   slack_channel_id: string | null;
   slack_channel_name: string | null;
   slack_channel_error: string | null;
-  flow_triggered_at: string | null;
-  flow_trigger_error: string | null;
   created_at: string;
 };
 

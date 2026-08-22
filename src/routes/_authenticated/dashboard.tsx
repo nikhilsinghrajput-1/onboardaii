@@ -20,7 +20,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
       { property: "og:title", content: "New hire provisioning status" },
       {
         property: "og:description",
-        content: "Live provisioning state for every new hire, pushed in by the automation flow.",
+        content: "Live provisioning state for every new hire, run by Acropolis's connected Slack and Gmail.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -76,7 +76,7 @@ function DashboardPage() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">New hire provisioning</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Add a hire here or let the automation flow push state in after every action step.
+            Add a hire and the app opens their Slack channel, invites them, and emails their welcome pack.
             Updates land live.
           </p>
         </div>

@@ -1,6 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { StatusBadge } from "@/components/StatusBadge";
 import { Button } from "@/components/ui/button";
@@ -14,6 +16,7 @@ import {
   tasksQuery,
   type TaskStatus,
 } from "@/lib/dashboard-data";
+import { runHireOnboarding } from "@/lib/hires.functions";
 import { useOrgContext } from "@/lib/org-context";
 
 export const Route = createFileRoute("/_authenticated/hires/$hireId")({
@@ -56,6 +59,24 @@ function HireDetail() {
   const approvals = useQuery(approvalsQuery(orgId));
   const [filter, setFilter] = useState<TaskStatus | "all">("all");
   const [open, setOpen] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const runOnboarding = useServerFn(runHireOnboarding);
+
+  const rerun = useMutation({
+    mutationFn: () =>
+      runOnboarding({
+        data: { orgId: orgId!, hireId, appOrigin: window.location.origin },
+      }),
+    onSuccess: (result) => {
+      toast.success("Onboarding run finished", {
+        description: `${result.completed} done · ${result.needsApproval} awaiting approval · ${result.failed} failed`,
+      });
+      void queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      void queryClient.invalidateQueries({ queryKey: ["hires"] });
+    },
+    onError: (error) =>
+      toast.error(error instanceof Error ? error.message : "Could not run onboarding."),
+  });
 
   const hire = hires.data?.find((h) => h.id === hireId);
   const hireTasks = (tasks.data ?? []).filter((t) => t.hire_id === hireId);
@@ -106,13 +127,20 @@ function HireDetail() {
         </div>
       </dl>
 
-      <p className="mt-4 font-mono text-xs text-muted-foreground">
-        Flow dispatch:{" "}
-        {hire.flow_triggered_at
-          ? `sent ${new Date(hire.flow_triggered_at).toLocaleString()}`
-          : "not sent yet"}
-        {hire.flow_trigger_error ? ` · ${hire.flow_trigger_error}` : ""}
-      </p>
+      <div className="mt-4 flex flex-wrap items-center gap-3">
+        <Button
+          size="sm"
+          disabled={!orgId || rerun.isPending}
+          onClick={() => rerun.mutate()}
+        >
+          {rerun.isPending ? "Running…" : "Re-run onboarding"}
+        </Button>
+        <span className="font-mono text-xs text-muted-foreground">
+          {hire.slack_channel_name
+            ? `Slack: #${hire.slack_channel_name}`
+            : (hire.slack_channel_error ?? "Slack channel: none yet")}
+        </span>
+      </div>
 
       <div className="mt-8 flex flex-wrap gap-2">
         {FILTERS.map((f) => (
