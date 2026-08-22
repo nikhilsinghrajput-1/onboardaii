@@ -74,7 +74,13 @@ export async function handleOnboardRelay(request: Request): Promise<Response> {
 
   if (!verified) {
     return Response.json(
-      { signature_verified: false, forwarded: false, error: "invalid signature" },
+      {
+        signature_verified: false,
+        verification_passed: false,
+        forwarded: false,
+        viasocket_status: null,
+        error: "invalid signature",
+      },
       { status: 401 },
     );
   }
@@ -131,9 +137,12 @@ export async function handleOnboardRelay(request: Request): Promise<Response> {
     });
     return Response.json({
       signature_verified: true,
+      verification_passed: true,
       forwarded: res.ok,
       upstream_status: res.status,
       upstream_body: text.slice(0, 1000),
+      viasocket_status: res.status,
+      viasocket_response: text.slice(0, 1000),
       forwarded_to: target,
       ...(res.ok ? {} : { error: `upstream returned ${res.status}` }),
     });
