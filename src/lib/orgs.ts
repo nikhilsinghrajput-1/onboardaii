@@ -14,61 +14,58 @@ export type Organization = {
   created_at: string;
 };
 
-const ACTIVE_ORG_KEY = "onboarding-control.active-org";
+export type Member = {
+  id: string;
+  org_id: string;
+  user_id: string | null;
+  email: string | null;
+  role: "owner" | "member";
+  created_at: string;
+};
 
-export function readActiveOrgId(): string | null {
-  if (typeof window === "undefined") return null;
-  return window.localStorage.getItem(ACTIVE_ORG_KEY);
-}
+const ORG_COLUMNS =
+  "id, name, slug, webhook_secret, slack_approval_channel, slack_alert_channel, resume_url, flow_trigger_url, created_at";
 
-export function writeActiveOrgId(id: string | null) {
-  if (typeof window === "undefined") return;
-  if (id) window.localStorage.setItem(ACTIVE_ORG_KEY, id);
-  else window.localStorage.removeItem(ACTIVE_ORG_KEY);
-}
-
-export function slugify(name: string): string {
-  return (
-    name
-      .toLowerCase()
-      .trim()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "")
-      .slice(0, 40) || "org"
-  );
-}
-
-export const orgsQuery = queryOptions({
-  queryKey: ["organizations"],
-  queryFn: async (): Promise<Organization[]> => {
-    const { data, error } = await supabase
-      .from("organizations")
-      .select(
-        "id, name, slug, webhook_secret, slack_approval_channel, slack_alert_channel, resume_url, flow_trigger_url, created_at",
-      )
-      .order("created_at", { ascending: true });
+/** This is a single-organization, internal-only workspace: there is exactly one row. */
+export const orgQuery = queryOptions({
+  queryKey: ["organization"],
+  queryFn: async (): Promise<Organization | null> => {
+    // Claim a pending invite (matched on email) before reading, so a first sign-in works.
+    await supabase.rpc("claim_membership");
+    const { data, error } = await supabase.from("organizations").select(ORG_COLUMNS).maybeSingle();
     if (error) throw error;
-    return (data ?? []) as Organization[];
+    return (data as Organization | null) ?? null;
   },
 });
 
-/** Creates the organization and makes the current user its owner. */
-export async function createOrganization(name: string): Promise<Organization> {
-  const base = slugify(name);
-  let slug = base;
-  for (let attempt = 0; attempt < 5; attempt += 1) {
-    const { data, error } = await supabase.rpc("create_organization", {
-      _name: name.trim(),
-      _slug: slug,
-    });
+export const membersQuery = queryOptions({
+  queryKey: ["organization-members"],
+  queryFn: async (): Promise<Member[]> => {
+    const { data, error } = await supabase
+      .from("organization_members")
+      .select("id, org_id, user_id, email, role, created_at")
+      .order("created_at", { ascending: true });
+    if (error) throw error;
+    return (data ?? []) as Member[];
+  },
+});
 
-    if (!error && data) return data as unknown as Organization;
-    // 23505 = unique violation on slug -> retry with a suffixed slug.
-    if (error && (error.code === "23505" || /duplicate key/i.test(error.message))) {
-      slug = `${base}-${Math.random().toString(36).slice(2, 6)}`;
-      continue;
-    }
-    throw error ?? new Error("Could not create the organization.");
+export async function addMember(orgId: string, email: string, role: "owner" | "member") {
+  const { error } = await supabase
+    .from("organization_members")
+    .insert({ org_id: orgId, email: email.trim().toLowerCase(), role });
+  if (error) {
+    if (error.code === "23505") throw new Error("That email already has access.");
+    throw error;
   }
-  throw new Error("Could not find a free organization URL. Try a different name.");
+}
+
+export async function removeMember(id: string) {
+  const { error } = await supabase.from("organization_members").delete().eq("id", id);
+  if (error) throw error;
+}
+
+export async function setMemberRole(id: string, role: "owner" | "member") {
+  const { error } = await supabase.from("organization_members").update({ role }).eq("id", id);
+  if (error) throw error;
 }
