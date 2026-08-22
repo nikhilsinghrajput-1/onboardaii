@@ -1,6 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 
-import { GATEWAY_BASE_URL, getOrgConnectionKey } from "./connections.server";
+import { GATEWAY_BASE_URL, appConnectionKey } from "./connections.server";
 
 export type OrgRow = {
   id: string;
