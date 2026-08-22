@@ -54,9 +54,10 @@ function Endpoint({ path, description, sample }: { path: string; description: st
 }
 
 function IntegrationsPage() {
-  const { activeOrg } = useOrgContext();
+  const { activeOrg, isOwner } = useOrgContext();
   const orgId = activeOrg?.id;
   const queryClient = useQueryClient();
+
 
   const fetchStatus = useServerFn(getIntegrationStatus);
   const fetchConnections = useServerFn(listOrgConnections);
@@ -152,16 +153,15 @@ function IntegrationsPage() {
   }
 
   const origin = typeof window === "undefined" ? "" : window.location.origin;
-  const slug = status.data?.slug ?? activeOrg?.slug ?? "your-org";
 
   return (
     <main className="mx-auto max-w-4xl px-6 py-10">
       <h1 className="text-2xl font-semibold tracking-tight">Wiring</h1>
       <p className="mt-1 text-sm text-muted-foreground">
-        {activeOrg?.name ?? "This organization"} connects its own tools here. The automation keeps
-        running the reasoning, dispatch, and retries — it pushes state into the endpoints below and
-        this dashboard pushes decisions back.
+        Acropolis connects its tools here. The automation keeps running the reasoning, dispatch, and
+        retries — it pushes state into the endpoints below and this dashboard pushes decisions back.
       </p>
+
 
       <section className="mt-10">
         <h2 className="text-sm font-medium uppercase tracking-wide text-muted-foreground">
