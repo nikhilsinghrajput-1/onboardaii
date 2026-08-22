@@ -68,18 +68,9 @@ export async function slackCallForOrg(
     return { ok: false, error: "gateway_key_missing", raw: "LOVABLE_API_KEY is not set" };
   }
 
-  let connectionKey: string | null = null;
-  try {
-    connectionKey = await getOrgConnectionKey(orgId, "slack");
-  } catch (error) {
-    console.error("org slack key lookup failed", error);
-  }
+  const connectionKey = appConnectionKey("slack");
   if (!connectionKey) {
-    const fallback = ["SLACK_API_KEY_1", "SLACK_API_KEY"].find((name) => process.env[name]);
-    connectionKey = fallback ? process.env[fallback]! : null;
-  }
-  if (!connectionKey) {
-    return { ok: false, error: "slack_not_connected", raw: "No Slack connection for this org" };
+    return { ok: false, error: "slack_not_connected", raw: "No Slack connection for this app" };
   }
 
   // Slack's Web API accepts JSON bodies only for methods with complex payloads
