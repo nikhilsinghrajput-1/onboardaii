@@ -44,13 +44,8 @@ export function NewHireDialog({ orgId }: { orgId: string | undefined }) {
     },
     onSuccess: (result) => {
       toast.success(`${fullName} added`, {
-        description: result.channels.length
-          ? `Slack access granted: #${result.channels.join(", #")}`
-          : (result.accessError ?? result.channelError ?? "Slack access is still pending."),
+        description: "Handed off to the automation flow — task updates land on the dashboard.",
       });
-      if (result.accessError || result.channelError) {
-        toast.error(result.accessError ?? result.channelError ?? "");
-      }
       if (result.flowOk) toast.success("Automation flow triggered");
       else if (result.flowError) toast.error(`Flow not triggered: ${result.flowError}`);
       setFullName("");
