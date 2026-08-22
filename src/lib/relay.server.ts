@@ -366,7 +366,10 @@ export async function handleRelayRequest(
   }
 
   const result = await deliverCallback({ endpointType, body: parsed.data, source: "api" });
-  const status = result.ok ? 200 : result.attempts === 0 ? 400 : 502;
+  // A delivery failure is a valid relay outcome, not a relay error: answer 200
+  // and report ok:false plus the downstream status in the body. Only rejected
+  // input (nothing was attempted) is a 4xx.
+  const status = result.attempts === 0 ? 400 : 200;
   const { duration_ms: _duration, ...payload } = result;
   return Response.json(payload, { status });
 }
