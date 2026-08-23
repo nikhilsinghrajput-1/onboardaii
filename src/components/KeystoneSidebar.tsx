@@ -4,10 +4,12 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import {
+  BarChart3,
   CheckCircle2,
   Gauge,
   LogOut,
   Plug,
+  ScanSearch,
   ShieldCheck,
   Users,
 } from "lucide-react";
@@ -33,6 +35,8 @@ import { useOrgContext } from "@/lib/org-context";
 const NAV = [
   { to: "/dashboard", label: "Overview", icon: Gauge },
   { to: "/approvals", label: "Approvals", icon: ShieldCheck },
+  { to: "/background-checks", label: "Background checks", icon: ScanSearch },
+  { to: "/intelligence", label: "Intelligence", icon: BarChart3 },
   { to: "/integrations", label: "Tools", icon: Plug },
   { to: "/admin", label: "Members", icon: Users },
 ] as const;

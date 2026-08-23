@@ -209,6 +209,174 @@ export type Database = {
           },
         ]
       }
+      background_check_claims: {
+        Row: {
+          category: string
+          check_id: string
+          claim: string
+          confidence: number | null
+          created_at: string
+          decided_by: string | null
+          evidence: string | null
+          finding: string | null
+          id: string
+          org_id: string
+          updated_at: string
+          verdict: string
+        }
+        Insert: {
+          category: string
+          check_id: string
+          claim: string
+          confidence?: number | null
+          created_at?: string
+          decided_by?: string | null
+          evidence?: string | null
+          finding?: string | null
+          id?: string
+          org_id: string
+          updated_at?: string
+          verdict?: string
+        }
+        Update: {
+          category?: string
+          check_id?: string
+          claim?: string
+          confidence?: number | null
+          created_at?: string
+          decided_by?: string | null
+          evidence?: string | null
+          finding?: string | null
+          id?: string
+          org_id?: string
+          updated_at?: string
+          verdict?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "background_check_claims_check_id_fkey"
+            columns: ["check_id"]
+            isOneToOne: false
+            referencedRelation: "background_checks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "background_check_claims_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      background_checks: {
+        Row: {
+          ai_error: string | null
+          completed_at: string | null
+          created_at: string
+          hire_id: string
+          id: string
+          org_id: string
+          requested_by: string | null
+          risk_score: number
+          status: string
+          summary: string | null
+          updated_at: string
+        }
+        Insert: {
+          ai_error?: string | null
+          completed_at?: string | null
+          created_at?: string
+          hire_id: string
+          id?: string
+          org_id: string
+          requested_by?: string | null
+          risk_score?: number
+          status?: string
+          summary?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ai_error?: string | null
+          completed_at?: string | null
+          created_at?: string
+          hire_id?: string
+          id?: string
+          org_id?: string
+          requested_by?: string | null
+          risk_score?: number
+          status?: string
+          summary?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "background_checks_hire_id_fkey"
+            columns: ["hire_id"]
+            isOneToOne: true
+            referencedRelation: "hires"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "background_checks_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      employee_signals: {
+        Row: {
+          captured_at: string
+          created_at: string
+          hire_id: string
+          id: string
+          live: boolean
+          metrics: Json
+          org_id: string
+          source: string
+          updated_at: string
+        }
+        Insert: {
+          captured_at?: string
+          created_at?: string
+          hire_id: string
+          id?: string
+          live?: boolean
+          metrics?: Json
+          org_id: string
+          source: string
+          updated_at?: string
+        }
+        Update: {
+          captured_at?: string
+          created_at?: string
+          hire_id?: string
+          id?: string
+          live?: boolean
+          metrics?: Json
+          org_id?: string
+          source?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employee_signals_hire_id_fkey"
+            columns: ["hire_id"]
+            isOneToOne: false
+            referencedRelation: "hires"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employee_signals_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       hires: {
         Row: {
           calendar_first_1on1_event_id: string | null
@@ -487,6 +655,63 @@ export type Database = {
           webhook_secret?: string
         }
         Relationships: []
+      }
+      performance_briefs: {
+        Row: {
+          coaching: Json
+          created_at: string
+          headline: string
+          hire_id: string
+          id: string
+          model: string | null
+          org_id: string
+          risks: Json
+          score: number
+          strengths: Json
+          updated_at: string
+        }
+        Insert: {
+          coaching?: Json
+          created_at?: string
+          headline: string
+          hire_id: string
+          id?: string
+          model?: string | null
+          org_id: string
+          risks?: Json
+          score?: number
+          strengths?: Json
+          updated_at?: string
+        }
+        Update: {
+          coaching?: Json
+          created_at?: string
+          headline?: string
+          hire_id?: string
+          id?: string
+          model?: string | null
+          org_id?: string
+          risks?: Json
+          score?: number
+          strengths?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "performance_briefs_hire_id_fkey"
+            columns: ["hire_id"]
+            isOneToOne: true
+            referencedRelation: "hires"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "performance_briefs_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
