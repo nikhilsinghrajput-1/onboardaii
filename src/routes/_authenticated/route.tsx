@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { createFileRoute, Outlet, redirect, useLocation } from "@tanstack/react-router";
 import { type ReactNode } from "react";
 
 import { KeystoneSidebar } from "@/components/KeystoneSidebar";
@@ -22,6 +22,7 @@ export const Route = createFileRoute("/_authenticated")({
 /** Internal tool: only people on the member list get in. */
 function MemberGate({ children }: { children: ReactNode }) {
   const { isLoading, isMember, userEmail } = useOrgContext();
+  const location = useLocation();
 
   if (isLoading || isMember === null) {
     return (
@@ -31,6 +32,11 @@ function MemberGate({ children }: { children: ReactNode }) {
     );
   }
 
+  // Candidates are not on the member list; they only get their own module portal.
+  if (!isMember && location.pathname.startsWith("/portal")) {
+    return <>{children}</>;
+  }
+
   if (!isMember) {
     return (
       <main className="mx-auto max-w-lg px-6 py-24 text-center">
@@ -38,6 +44,13 @@ function MemberGate({ children }: { children: ReactNode }) {
         <p className="mt-2 text-sm text-muted-foreground">
           {userEmail ? <span className="font-mono">{userEmail}</span> : "This account"} is not on the
           Acropolis member list. Ask an admin to add you, then sign in again.
+        </p>
+        <p className="mt-4 text-sm text-muted-foreground">
+          Invited as a candidate? Your modules live at{" "}
+          <a className="font-mono text-primary underline" href="/portal">
+            /portal
+          </a>
+          .
         </p>
       </main>
     );
