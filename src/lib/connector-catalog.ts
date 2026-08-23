@@ -11,11 +11,12 @@ export const CONNECTOR_CATALOG: ConnectorSpec[] = [
     id: "slack",
     label: "Slack",
     blurb: "Approval requests and failure alerts in your own workspace.",
+    // Personal (user-token) scopes: the admin signs in and Keystone acts as them,
+    // so it can create channels and invite hires in their own workspace.
     scopes: [
       "chat:write",
-      "chat:write.public",
       "channels:read",
-      "channels:manage",
+      "channels:write",
       "groups:read",
       "groups:write",
       "users:read",
