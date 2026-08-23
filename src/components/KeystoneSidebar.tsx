@@ -4,10 +4,12 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import {
+  BarChart3,
   CheckCircle2,
   Gauge,
   LogOut,
   Plug,
+  ScanSearch,
   ShieldCheck,
   Users,
 } from "lucide-react";
