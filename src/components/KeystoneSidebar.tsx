@@ -35,11 +35,15 @@ import { useOrgContext } from "@/lib/org-context";
 const NAV = [
   { to: "/dashboard", label: "Overview", icon: Gauge },
   { to: "/approvals", label: "Approvals", icon: ShieldCheck },
+  { to: "/modules", label: "Modules", icon: GraduationCap },
   { to: "/background-checks", label: "Background checks", icon: ScanSearch },
   { to: "/intelligence", label: "Intelligence", icon: BarChart3 },
   { to: "/integrations", label: "Tools", icon: Plug },
   { to: "/admin", label: "Members", icon: Users },
 ] as const;
+
+/** Candidates are signed in but not on the member list — they only get their portal. */
+const CANDIDATE_NAV = [{ to: "/portal", label: "My modules", icon: GraduationCap }] as const;
 
 export function KeystoneSidebar() {
   const navigate = useNavigate();
