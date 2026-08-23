@@ -58,6 +58,49 @@ function IntegrationsPage() {
 
   const [approval, setApproval] = useState("");
   const [alert, setAlert] = useState("");
+  const [pendingConnector, setPendingConnector] = useState<string | null>(null);
+
+  const startOAuth = useServerFn(startConnectorOAuth);
+  const completeOAuth = useServerFn(completeConnectorOAuth);
+  const revokeOAuth = useServerFn(disconnectConnector);
+
+  const connectMutation = useMutation({
+    mutationFn: async (connectorId: string) => {
+      const popup = window.open("", "keystone-oauth", "width=600,height=760");
+      if (!popup) throw new Error("Allow popups for this site and try again.");
+      setPendingConnector(connectorId);
+      try {
+        const { authorizationUrl } = await startOAuth({ data: { orgId: orgId!, connectorId } });
+        const completion = waitForOAuthCompletion(popup, connectorId);
+        popup.location.href = authorizationUrl;
+        const code = await completion;
+        if (code) await completeOAuth({ data: { orgId: orgId!, connectorId, code } });
+      } catch (error) {
+        popup.close();
+        throw error;
+      } finally {
+        setPendingConnector(null);
+      }
+    },
+    onSuccess: () => {
+      toast.success("Connected.");
+      void queryClient.invalidateQueries({ queryKey: ["org-connections", orgId] });
+      void queryClient.invalidateQueries({ queryKey: ["integration-status", orgId] });
+    },
+    onError: (error) =>
+      toast.error(error instanceof Error ? error.message : "Could not finish connecting."),
+  });
+
+  const disconnectMutation = useMutation({
+    mutationFn: (connectorId: string) => revokeOAuth({ data: { orgId: orgId!, connectorId } }),
+    onSuccess: () => {
+      toast.success("Disconnected.");
+      void queryClient.invalidateQueries({ queryKey: ["org-connections", orgId] });
+    },
+    onError: (error) =>
+      toast.error(error instanceof Error ? error.message : "Could not disconnect."),
+  });
+
   
 
   useEffect(() => {
