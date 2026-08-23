@@ -102,7 +102,10 @@ function IntegrationsPage() {
         {connections.isLoading && <Skeleton className="mt-3 h-32 w-full" />}
         <ul className="mt-3 grid gap-3 sm:grid-cols-2">
           {CONNECTOR_CATALOG.map((spec) => {
-            const connected = Boolean(connections.data?.find((c) => c.id === spec.id)?.connected);
+            const row = connections.data?.find((c) => c.id === spec.id);
+            const connected = Boolean(row?.connected);
+            const viaOAuth = Boolean(row?.oauthConnected);
+            const canOAuth = Boolean(row?.oauthAvailable);
             return (
               <li key={spec.id} className="rounded-xl border border-border/70 bg-card p-5">
                 <div className="flex items-center gap-2">
@@ -113,16 +116,43 @@ function IntegrationsPage() {
                   <span
                     className={`ml-auto text-xs ${connected ? "text-ok" : "text-muted-foreground"}`}
                   >
-                    {connected ? "active" : "not connected"}
+                    {viaOAuth ? "connected by admin" : connected ? "active" : "not connected"}
                   </span>
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">{spec.blurb}</p>
+                {canOAuth && (
+                  <div className="mt-3 flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant={viaOAuth ? "outline" : "default"}
+                      disabled={!orgId || pendingConnector === spec.id}
+                      onClick={() => connectMutation.mutate(spec.id)}
+                    >
+                      {pendingConnector === spec.id
+                        ? "Opening…"
+                        : viaOAuth
+                          ? `Reconnect ${spec.label}`
+                          : `Connect ${spec.label}`}
+                    </Button>
+                    {viaOAuth && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        disabled={!orgId || disconnectMutation.isPending}
+                        onClick={() => disconnectMutation.mutate(spec.id)}
+                      >
+                        Disconnect
+                      </Button>
+                    )}
+                  </div>
+                )}
               </li>
             );
           })}
         </ul>
         <p className="mt-3 text-xs text-muted-foreground">
-          Tools show as active as soon as they are connected for this workspace.
+          Connect a tool here to sign in with your own account — Keystone then acts inside that
+          workspace. Tools without a sign-in button run on the shared workspace connection.
         </p>
       </section>
 
