@@ -31,7 +31,7 @@
 
 **Keystone** is the internal operations cockpit that turns new-hire onboarding from a scattered checklist into a **single, auditable, AI-assisted command center**.
 
-No more "did someone add them to Slack?" No more hunting through Gmail sent folders. No more spreadsheets that are out of date the second you save them. Keystone provisions, tracks, approves, and reports every step automatically — while keeping humans in control of the decisions that matter.
+No more "did someone add them to Slack?" No more hunting through Gmail sent folders. No more spreadsheets that are out of date the second you save them. Keystone provisions, tracks, approves, verifies, trains, and reports every step automatically — while keeping humans in control of the decisions that matter.
 
 > **One hire. One record. Every tool. Zero chaos.**
 
@@ -46,6 +46,9 @@ No more "did someone add them to Slack?" No more hunting through Gmail sent fold
 | ⚖️ **Approval Risk Copilot** | Every pending approval gets a risk level, recommendation, and reasoning from AI. You still click approve — but now you know *why*. |
 | 💬 **Ask Keystone** | Chat with your live onboarding data. "Who starts Monday?" "What failed for Nikhil?" "Re-run Drive provisioning for Sarah." |
 | 🔌 **Real Connector Actions** | Slack invites, Gmail welcomes, Calendar bookings, Drive folders, Sheets rows, Notion pages, Teams posts, Outlook fallbacks. Not mock data. Real calls. |
+| 🔍 **Background Checks** | Paste resume claims and evidence, then let AI verify identity, employment, education, and risk signals with a 0–100 risk score and written findings. |
+| 📊 **Business Intelligence** | See live employee signals — GitHub PRs, Slack activity, Jira tickets — plus an AI-generated performance brief with strengths, risks, and coaching actions. |
+| 🎓 **Modules & Assessments** | Turn candidates into hires with auto-assigned learning tracks, MCQ + written assessments, AI grading, and invite-by-email portals. |
 | 🏥 **Live Tool Health** | Every connector shows green/yellow/red status with last-success timestamps. |
 | 📜 **Activity Log** | Every action Keystone takes is recorded: tool, hire, outcome, timestamp. Fully auditable. |
 | 🔐 **Human-in-the-Loop Approvals** | Sensitive access routes to approvers inside the app (and Slack, if you want). No shadow IT. |
@@ -62,50 +65,73 @@ flowchart TB
         B[shadcn/ui Sidebar & Cards]
         C[Real-time Supabase Subscriptions]
         D[Ask Keystone Chat]
+        E[Background Check UI]
+        F[BI Dashboard]
+        G[Candidate Portal]
     end
 
     subgraph Backend["⚙️ Backend — Operations Engine"]
-        E[TanStack Server Functions]
-        F[Onboarding Runner]
-        G[AI Gateway via Lovable]
-        H[Connector Gateway]
+        H[TanStack Server Functions]
+        I[Onboarding Runner]
+        J[AI Gateway via Lovable]
+        K[Connector Gateway]
+        L[Background Check Engine]
+        M[BI Signal Aggregator]
+        N[Module & Assessment Engine]
     end
 
     subgraph Data["🗄️ Data Layer"]
-        I[Supabase Postgres]
-        J[hires / tasks / approvals]
-        K[activity_log / ai_briefings]
-        L[org_connections]
+        O[Supabase Postgres]
+        P[hires / tasks / approvals]
+        Q[activity_log / ai_briefings]
+        R[background_checks / employee_signals]
+        S[module_tracks / candidate_module_progress]
+        T[org_connections]
     end
 
     subgraph Tools["🔌 Connected Tools"]
-        M[Slack]
-        N[Gmail]
-        O[Google Calendar]
-        P[Google Drive]
-        Q[Google Sheets]
-        R[Notion]
-        S[Microsoft Teams]
-        T[Microsoft Outlook]
+        U[Slack]
+        V[Gmail]
+        W[Google Calendar]
+        X[Google Drive]
+        Y[Google Sheets]
+        Z[Notion]
+        AA[Microsoft Teams]
+        AB[Microsoft Outlook]
+        AC[GitHub]
+        AD[Jira]
     end
 
-    A --> E
-    D --> G
-    E --> F
-    F --> H
+    A --> H
+    D --> J
+    E --> L
+    F --> M
+    G --> N
+    H --> I
+    H --> L
     H --> M
     H --> N
-    H --> O
-    H --> P
-    H --> Q
-    H --> R
-    H --> S
-    H --> T
-    E --> I
-    F --> I
-    I --> J
     I --> K
-    I --> L
+    K --> U
+    K --> V
+    K --> W
+    K --> X
+    K --> Y
+    K --> Z
+    K --> AA
+    K --> AB
+    M --> AC
+    M --> AD
+    H --> O
+    I --> O
+    L --> O
+    M --> O
+    N --> O
+    O --> P
+    O --> Q
+    O --> R
+    O --> S
+    O --> T
 ```
 
 ---
@@ -119,28 +145,9 @@ flowchart TB
 | **Backend** | TanStack `createServerFn` on Cloudflare Workers edge runtime |
 | **Database & Auth** | Supabase (Postgres + RLS + Auth) |
 | **AI** | Lovable AI Gateway → Google Gemini 2.5 Flash |
-| **Integrations** | Lovable Connector Gateway |
+| **Integrations** | Lovable Connector Gateway + App User OAuth |
 | **Monitoring** | Microsoft Clarity |
 | **Protocol** | Model Context Protocol (MCP) for agent integrations |
-
----
-
-## 📂 Repository Structure
-
-```
-keystone/
-├── src/
-│   ├── components/          # UI pieces: sidebar, briefing, chat, approval copilot
-│   ├── lib/                 # Server logic: runner, connectors, AI, decisions
-│   ├── routes/              # TanStack file-based routes
-│   │   ├── _authenticated/  # App shell + protected pages
-│   │   └── api/             # Public API endpoints + MCP + OAuth
-│   ├── integrations/        # Supabase clients, auth middleware, MCP wiring
-│   └── styles.css           # Keystone design tokens (dark control room theme)
-├── supabase/
-│   └── migrations/          # RLS-enabled schema migrations
-└── README.md              # You are here 🔥
-```
 
 ---
 
@@ -219,6 +226,8 @@ Keystone is designed to feel like the dashboard an operations team actually want
 | HubSpot | ⚪ Listed | Not connected |
 | Salesforce | ⚪ Listed | Not connected |
 | SharePoint | ⚪ Listed | Not connected |
+| GitHub | ⚪ Available | PR activity for BI |
+| Jira | ⚪ Available | Ticket activity for BI |
 
 ---
 
@@ -258,6 +267,11 @@ Open `http://localhost:8080` and sign in. If you're running Acropolis, you're al
 - [x] Left sidebar app shell + dark control room theme
 - [x] AI daily briefing + approval risk copilot + Ask Keystone chat
 - [x] Real connector actions across Slack, Gmail, Calendar, Drive, Sheets, Notion, Teams, Outlook
+- [x] Background checks with AI verification
+- [x] Business intelligence dashboard with GitHub, Slack, and Jira signals
+- [x] Candidate modules, assessments, and AI grading
+- [x] Admin member management + role-based access
+- [x] App User OAuth for per-admin workspace connections
 - [x] MCP agent integration surface
 - [ ] Advanced analytics & time-to-ready trends
 - [ ] Multi-step approval chains with escalation
