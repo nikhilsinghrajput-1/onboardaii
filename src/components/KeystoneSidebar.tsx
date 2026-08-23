@@ -7,6 +7,7 @@ import {
   BarChart3,
   CheckCircle2,
   Gauge,
+  GraduationCap,
   LogOut,
   Plug,
   ScanSearch,
@@ -35,16 +36,20 @@ import { useOrgContext } from "@/lib/org-context";
 const NAV = [
   { to: "/dashboard", label: "Overview", icon: Gauge },
   { to: "/approvals", label: "Approvals", icon: ShieldCheck },
+  { to: "/modules", label: "Modules", icon: GraduationCap },
   { to: "/background-checks", label: "Background checks", icon: ScanSearch },
   { to: "/intelligence", label: "Intelligence", icon: BarChart3 },
   { to: "/integrations", label: "Tools", icon: Plug },
   { to: "/admin", label: "Members", icon: Users },
 ] as const;
 
+/** Candidates are signed in but not on the member list — they only get their portal. */
+const CANDIDATE_NAV = [{ to: "/portal", label: "My modules", icon: GraduationCap }] as const;
+
 export function KeystoneSidebar() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { activeOrg, userEmail } = useOrgContext();
+  const { activeOrg, userEmail, isMember } = useOrgContext();
   const orgId = activeOrg?.id;
   const tasks = useQuery(tasksQuery(orgId));
   const fetchConnections = useServerFn(listOrgConnections);
@@ -75,9 +80,9 @@ export function KeystoneSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Operations</SidebarGroupLabel>
+          <SidebarGroupLabel>{isMember === false ? "Candidate" : "Operations"}</SidebarGroupLabel>
           <SidebarMenu>
-            {NAV.map((item) => (
+            {(isMember === false ? CANDIDATE_NAV : NAV).map((item) => (
               <SidebarMenuItem key={item.to}>
                 <SidebarMenuButton asChild tooltip={item.label}>
                   <Link
@@ -96,7 +101,7 @@ export function KeystoneSidebar() {
           </SidebarMenu>
         </SidebarGroup>
 
-        <SidebarGroup className="group-data-[collapsible=icon]:hidden">
+        <SidebarGroup className="group-data-[collapsible=icon]:hidden data-[candidate=true]:hidden" data-candidate={isMember === false}>
           <SidebarGroupLabel>Tool health</SidebarGroupLabel>
           <div className="px-2">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">

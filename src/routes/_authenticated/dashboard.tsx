@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 
 import { AiBriefingCard } from "@/components/AiBriefingCard";
 import { AskKeystone } from "@/components/AskKeystone";
+import { NewCandidateDialog } from "@/components/NewCandidateDialog";
 import { NewHireDialog } from "@/components/NewHireDialog";
 import { StatusBadge } from "@/components/StatusBadge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -118,8 +119,9 @@ function DashboardPage() {
             sensitive for a human.
           </p>
         </div>
-        <div className="ml-auto">
+        <div className="ml-auto flex flex-wrap items-center gap-2">
           <NewHireDialog orgId={orgId} />
+          <NewCandidateDialog orgId={orgId} />
         </div>
       </div>
 

@@ -209,6 +209,124 @@ export type Database = {
           },
         ]
       }
+      assessment_answers: {
+        Row: {
+          ai_feedback: string | null
+          ai_score: number | null
+          answer_text: string | null
+          assessment_id: string
+          choice_index: number | null
+          correct: boolean | null
+          created_at: string
+          id: string
+          org_id: string
+          question_id: string
+          updated_at: string
+        }
+        Insert: {
+          ai_feedback?: string | null
+          ai_score?: number | null
+          answer_text?: string | null
+          assessment_id: string
+          choice_index?: number | null
+          correct?: boolean | null
+          created_at?: string
+          id?: string
+          org_id: string
+          question_id: string
+          updated_at?: string
+        }
+        Update: {
+          ai_feedback?: string | null
+          ai_score?: number | null
+          answer_text?: string | null
+          assessment_id?: string
+          choice_index?: number | null
+          correct?: boolean | null
+          created_at?: string
+          id?: string
+          org_id?: string
+          question_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessment_answers_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "candidate_assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_answers_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: true
+            referencedRelation: "assessment_questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      assessment_questions: {
+        Row: {
+          assessment_id: string
+          correct_index: number | null
+          created_at: string
+          id: string
+          kind: string
+          options: Json
+          org_id: string
+          points: number
+          position: number
+          prompt: string
+        }
+        Insert: {
+          assessment_id: string
+          correct_index?: number | null
+          created_at?: string
+          id?: string
+          kind?: string
+          options?: Json
+          org_id: string
+          points?: number
+          position?: number
+          prompt: string
+        }
+        Update: {
+          assessment_id?: string
+          correct_index?: number | null
+          created_at?: string
+          id?: string
+          kind?: string
+          options?: Json
+          org_id?: string
+          points?: number
+          position?: number
+          prompt?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "assessment_questions_assessment_id_fkey"
+            columns: ["assessment_id"]
+            isOneToOne: false
+            referencedRelation: "candidate_assessments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "assessment_questions_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       background_check_claims: {
         Row: {
           category: string
@@ -322,6 +440,197 @@ export type Database = {
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      candidate_assessments: {
+        Row: {
+          ai_feedback: string | null
+          candidate_id: string
+          created_at: string
+          graded_at: string | null
+          id: string
+          max_score: number | null
+          org_id: string
+          score: number | null
+          status: string
+          submitted_at: string | null
+          track_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          ai_feedback?: string | null
+          candidate_id: string
+          created_at?: string
+          graded_at?: string | null
+          id?: string
+          max_score?: number | null
+          org_id: string
+          score?: number | null
+          status?: string
+          submitted_at?: string | null
+          track_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          ai_feedback?: string | null
+          candidate_id?: string
+          created_at?: string
+          graded_at?: string | null
+          id?: string
+          max_score?: number | null
+          org_id?: string
+          score?: number | null
+          status?: string
+          submitted_at?: string | null
+          track_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_assessments_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_assessments_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_assessments_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "module_tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      candidate_module_progress: {
+        Row: {
+          candidate_id: string
+          completed_at: string | null
+          created_at: string
+          id: string
+          module_item_id: string
+          org_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          candidate_id: string
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          module_item_id: string
+          org_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          candidate_id?: string
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          module_item_id?: string
+          org_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidate_module_progress_candidate_id_fkey"
+            columns: ["candidate_id"]
+            isOneToOne: false
+            referencedRelation: "candidates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_module_progress_module_item_id_fkey"
+            columns: ["module_item_id"]
+            isOneToOne: false
+            referencedRelation: "module_items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidate_module_progress_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      candidates: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          department: string
+          email: string
+          full_name: string
+          id: string
+          invite_error: string | null
+          invite_sent_at: string | null
+          notes: string | null
+          org_id: string
+          role: string
+          stage: string
+          track_id: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          department?: string
+          email: string
+          full_name: string
+          id?: string
+          invite_error?: string | null
+          invite_sent_at?: string | null
+          notes?: string | null
+          org_id: string
+          role: string
+          stage?: string
+          track_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          department?: string
+          email?: string
+          full_name?: string
+          id?: string
+          invite_error?: string | null
+          invite_sent_at?: string | null
+          notes?: string | null
+          org_id?: string
+          role?: string
+          stage?: string
+          track_id?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "candidates_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "candidates_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "module_tracks"
             referencedColumns: ["id"]
           },
         ]
@@ -471,6 +780,101 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "hires_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      module_items: {
+        Row: {
+          content: string
+          created_at: string
+          duration_minutes: number
+          id: string
+          org_id: string
+          position: number
+          title: string
+          track_id: string
+          updated_at: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          org_id: string
+          position?: number
+          title: string
+          track_id: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          org_id?: string
+          position?: number
+          title?: string
+          track_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_items_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "module_items_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "module_tracks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      module_tracks: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          org_id: string
+          role_key: string
+          source: string
+          summary: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          org_id: string
+          role_key: string
+          source?: string
+          summary?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          org_id?: string
+          role_key?: string
+          source?: string
+          summary?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_tracks_org_id_fkey"
             columns: ["org_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -719,6 +1123,9 @@ export type Database = {
     }
     Functions: {
       claim_membership: { Args: never; Returns: boolean }
+      is_my_assessment: { Args: { _assessment_id: string }; Returns: boolean }
+      is_my_candidate: { Args: { _candidate_id: string }; Returns: boolean }
+      is_my_track: { Args: { _track_id: string }; Returns: boolean }
       is_org_member: { Args: { _org_id: string }; Returns: boolean }
       is_org_owner: { Args: { _org_id: string }; Returns: boolean }
     }
