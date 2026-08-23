@@ -9,6 +9,12 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getIntegrationStatus, saveOrgSettings } from "@/lib/approvals.functions";
 import { listOrgConnections } from "@/lib/connections.functions";
+import {
+  completeConnectorOAuth,
+  disconnectConnector,
+  startConnectorOAuth,
+} from "@/lib/app-user-oauth.functions";
+import { waitForOAuthCompletion } from "@/lib/appUserConnectorClient";
 import { CONNECTOR_CATALOG } from "@/lib/connector-catalog";
 import { MembersCard } from "@/components/MembersCard";
 import { useOrgContext } from "@/lib/org-context";
