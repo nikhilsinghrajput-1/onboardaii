@@ -466,9 +466,24 @@ export async function markProgress(userId: string, moduleItemId: string, done: b
   return { ok: true, done };
 }
 
+type AnswerRow = {
+  org_id: string;
+  assessment_id: string;
+  question_id: string;
+  choice_index?: number | null;
+  correct?: boolean | null;
+  answer_text?: string | null;
+  ai_score?: number | null;
+  ai_feedback?: string | null;
+};
+
 export async function gradeSubmission(
   userId: string,
-  answers: { questionId: string; choiceIndex?: number | null; text?: string }[],
+  answers: {
+    questionId: string;
+    choiceIndex?: number | null | undefined;
+    text?: string | undefined;
+  }[],
 ) {
   const db = await admin();
   const { data: candidate } = await db
@@ -509,7 +524,7 @@ export async function gradeSubmission(
 
   const given = new Map(answers.map((a) => [a.questionId, a]));
   let score = 0;
-  const rows: Record<string, unknown>[] = [];
+  const rows: AnswerRow[] = [];
   const written: { id: string; prompt: string; answer: string; points: number }[] = [];
 
   for (const q of questions ?? []) {
@@ -520,8 +535,8 @@ export async function gradeSubmission(
       const correct = choice !== null && choice === (q.correct_index as number | null);
       if (correct) score += (q.points as number) ?? 1;
       rows.push({
-        org_id: candidate.org_id,
-        assessment_id: assessment.id,
+        org_id: candidate.org_id as string,
+        assessment_id: assessment.id as string,
         question_id: id,
         choice_index: choice,
         correct,
@@ -535,8 +550,8 @@ export async function gradeSubmission(
         points: (q.points as number) ?? 5,
       });
       rows.push({
-        org_id: candidate.org_id,
-        assessment_id: assessment.id,
+        org_id: candidate.org_id as string,
+        assessment_id: assessment.id as string,
         question_id: id,
         answer_text: text,
       });
@@ -545,11 +560,10 @@ export async function gradeSubmission(
 
   const graded = await gradeWritten(candidate.role as string, written);
   for (const row of rows) {
-    const id = row["question_id"] as string;
-    const g = graded.scores[id];
+    const g = graded.scores[row.question_id];
     if (g) {
-      row["ai_score"] = g.score;
-      row["ai_feedback"] = g.feedback;
+      row.ai_score = g.score;
+      row.ai_feedback = g.feedback;
       score += g.score;
     }
   }
