@@ -68,7 +68,16 @@ export async function slackCallForOrg(
     return { ok: false, error: "gateway_key_missing", raw: "LOVABLE_API_KEY is not set" };
   }
 
-  const connectionKey = appConnectionKey("slack");
+  // Prefer the workspace an admin connected through Slack OAuth on the wiring
+  // page; fall back to the app-level Slack connection when none exists.
+  const { getOrgConnectionKey } = await import("./connections.server");
+  let connectionKey: string | undefined;
+  try {
+    connectionKey = (await getOrgConnectionKey(orgId, "slack")) ?? undefined;
+  } catch (error) {
+    console.error("org slack connection lookup failed", error);
+  }
+  connectionKey ??= appConnectionKey("slack");
   if (!connectionKey) {
     return { ok: false, error: "slack_not_connected", raw: "No Slack connection for this app" };
   }

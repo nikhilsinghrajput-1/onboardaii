@@ -17,8 +17,16 @@ export const listOrgConnections = createServerFn({ method: "GET" })
     const store = await import("./connections.server");
     const { CONNECTOR_CATALOG } = await import("./connector-catalog");
     await store.assertOrgMember(context.supabase as never, data.orgId, context.userId);
-    return CONNECTOR_CATALOG.map((spec) => ({
-      id: spec.id,
-      connected: Boolean(store.appConnectionKey(spec.id)),
-    }));
+    const orgConnected = new Set(await store.listOrgConnectorIds(data.orgId));
+    return CONNECTOR_CATALOG.map((spec) => {
+      const workspace = Boolean(store.appConnectionKey(spec.id));
+      const oauth = orgConnected.has(spec.id);
+      return {
+        id: spec.id,
+        connected: workspace || oauth,
+        oauthConnected: oauth,
+        oauthAvailable: Boolean(store.clientApiKeyFor(spec.id)),
+        source: oauth ? ("oauth" as const) : workspace ? ("workspace" as const) : ("none" as const),
+      };
+    });
   });

@@ -9,6 +9,12 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getIntegrationStatus, saveOrgSettings } from "@/lib/approvals.functions";
 import { listOrgConnections } from "@/lib/connections.functions";
+import {
+  completeConnectorOAuth,
+  disconnectConnector,
+  startConnectorOAuth,
+} from "@/lib/app-user-oauth.functions";
+import { waitForOAuthCompletion } from "@/lib/appUserConnectorClient";
 import { CONNECTOR_CATALOG } from "@/lib/connector-catalog";
 import { MembersCard } from "@/components/MembersCard";
 import { useOrgContext } from "@/lib/org-context";
@@ -58,6 +64,49 @@ function IntegrationsPage() {
 
   const [approval, setApproval] = useState("");
   const [alert, setAlert] = useState("");
+  const [pendingConnector, setPendingConnector] = useState<string | null>(null);
+
+  const startOAuth = useServerFn(startConnectorOAuth);
+  const completeOAuth = useServerFn(completeConnectorOAuth);
+  const revokeOAuth = useServerFn(disconnectConnector);
+
+  const connectMutation = useMutation({
+    mutationFn: async (connectorId: string) => {
+      const popup = window.open("", "keystone-oauth", "width=600,height=760");
+      if (!popup) throw new Error("Allow popups for this site and try again.");
+      setPendingConnector(connectorId);
+      try {
+        const { authorizationUrl } = await startOAuth({ data: { orgId: orgId!, connectorId } });
+        const completion = waitForOAuthCompletion(popup, connectorId);
+        popup.location.href = authorizationUrl;
+        const code = await completion;
+        if (code) await completeOAuth({ data: { orgId: orgId!, connectorId, code } });
+      } catch (error) {
+        popup.close();
+        throw error;
+      } finally {
+        setPendingConnector(null);
+      }
+    },
+    onSuccess: () => {
+      toast.success("Connected.");
+      void queryClient.invalidateQueries({ queryKey: ["org-connections", orgId] });
+      void queryClient.invalidateQueries({ queryKey: ["integration-status", orgId] });
+    },
+    onError: (error) =>
+      toast.error(error instanceof Error ? error.message : "Could not finish connecting."),
+  });
+
+  const disconnectMutation = useMutation({
+    mutationFn: (connectorId: string) => revokeOAuth({ data: { orgId: orgId!, connectorId } }),
+    onSuccess: () => {
+      toast.success("Disconnected.");
+      void queryClient.invalidateQueries({ queryKey: ["org-connections", orgId] });
+    },
+    onError: (error) =>
+      toast.error(error instanceof Error ? error.message : "Could not disconnect."),
+  });
+
   
 
   useEffect(() => {
@@ -102,7 +151,10 @@ function IntegrationsPage() {
         {connections.isLoading && <Skeleton className="mt-3 h-32 w-full" />}
         <ul className="mt-3 grid gap-3 sm:grid-cols-2">
           {CONNECTOR_CATALOG.map((spec) => {
-            const connected = Boolean(connections.data?.find((c) => c.id === spec.id)?.connected);
+            const row = connections.data?.find((c) => c.id === spec.id);
+            const connected = Boolean(row?.connected);
+            const viaOAuth = Boolean(row?.oauthConnected);
+            const canOAuth = Boolean(row?.oauthAvailable);
             return (
               <li key={spec.id} className="rounded-xl border border-border/70 bg-card p-5">
                 <div className="flex items-center gap-2">
@@ -113,16 +165,43 @@ function IntegrationsPage() {
                   <span
                     className={`ml-auto text-xs ${connected ? "text-ok" : "text-muted-foreground"}`}
                   >
-                    {connected ? "active" : "not connected"}
+                    {viaOAuth ? "connected by admin" : connected ? "active" : "not connected"}
                   </span>
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">{spec.blurb}</p>
+                {canOAuth && (
+                  <div className="mt-3 flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant={viaOAuth ? "outline" : "default"}
+                      disabled={!orgId || pendingConnector === spec.id}
+                      onClick={() => connectMutation.mutate(spec.id)}
+                    >
+                      {pendingConnector === spec.id
+                        ? "Opening…"
+                        : viaOAuth
+                          ? `Reconnect ${spec.label}`
+                          : `Connect ${spec.label}`}
+                    </Button>
+                    {viaOAuth && (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        disabled={!orgId || disconnectMutation.isPending}
+                        onClick={() => disconnectMutation.mutate(spec.id)}
+                      >
+                        Disconnect
+                      </Button>
+                    )}
+                  </div>
+                )}
               </li>
             );
           })}
         </ul>
         <p className="mt-3 text-xs text-muted-foreground">
-          Tools show as active as soon as they are connected for this workspace.
+          Connect a tool here to sign in with your own account — Keystone then acts inside that
+          workspace. Tools without a sign-in button run on the shared workspace connection.
         </p>
       </section>
 
